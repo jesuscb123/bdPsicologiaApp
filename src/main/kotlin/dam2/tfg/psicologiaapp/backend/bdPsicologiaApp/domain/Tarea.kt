@@ -18,7 +18,7 @@ data class Tarea(
 
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn (name = "psicologo_id", nullable = false)
-    var piscologo: Psicologo,
+    var psicologo: Psicologo,
 
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn (name = "paciente_id", nullable = false)

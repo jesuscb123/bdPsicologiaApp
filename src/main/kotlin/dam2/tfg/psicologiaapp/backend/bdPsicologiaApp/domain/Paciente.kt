@@ -21,5 +21,12 @@ class Paciente(
     )
     var listaTareas: MutableList<Tarea> = mutableListOf()
 
+    @OneToMany(
+        mappedBy = "paciente",
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL]
+    )
+    var listaNotas: MutableList<Nota> = mutableListOf()
+
 
 }
