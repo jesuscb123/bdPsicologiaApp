@@ -1,4 +1,4 @@
-package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repositories
+package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 
 import jakarta.persistence.*
 
