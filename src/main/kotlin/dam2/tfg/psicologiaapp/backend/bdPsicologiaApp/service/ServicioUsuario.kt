@@ -26,6 +26,7 @@ class ServicioUsuario(val usuarioRepository: UsuarioRepository) : IServicioUsuar
         if (existeUsuario != null){
             return existeUsuario
         }else{
+            require(email.isNotEmpty())
             val nuevoUsuario = UsuarioMapper.toEntity(request, fireBaseUid, email)
             return usuarioRepository.save(nuevoUsuario)
         }
