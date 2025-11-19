@@ -1,23 +1,23 @@
-package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
+package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repositories
 
 import jakarta.persistence.*
 
 @Entity
-@Table (name = "notas")
-data class Nota(
+@Table (name = "NOTAS")
+class Nota(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
     @Column (nullable = false)
-    var asunto: String,
+    var asunto: String = "",
 
     @Column (nullable = false)
-    var descripcion: String,
+    var descripcion: String = "",
 
     @ManyToOne (fetch = FetchType.LAZY)
-    @JoinColumn (name = "paciente_id")
+    @JoinColumn (name = "paciente_id", nullable = false)
     var paciente: Paciente,
 
     @ManyToOne (fetch = FetchType.LAZY)

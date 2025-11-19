@@ -1,10 +1,9 @@
-package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
+package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repositories
 
 import jakarta.persistence.*
-import javax.management.monitor.StringMonitor
 
 @Entity
-@Table (name = "tareas")
+@Table (name = "TAREAS")
 data class Tarea(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
