@@ -3,13 +3,15 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Paciente
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.UsuarioRequest
+import org.springframework.stereotype.Service
+
 
 interface IServicioUsuario {
-    fun encontrarByFirebaseUid(idFirebase: String) : Usuario?
+    fun obtenerUsuarioByFireBaseId(idFirebase: String) : Usuario?
 
-    fun crearUsuario(uid: String, email: String): Usuario
+    fun obtenerUsuarios(): List<Usuario>
 
-    fun crearPsicologo(usuarioId: Long, numeroColegiado: String): Psicologo
+    fun crearUsuario(fireBaseUid: String, email: String, request: UsuarioRequest): Usuario
 
-    fun crearPaciente(usuarioId: Long, psicologoId: Long): Paciente
 }

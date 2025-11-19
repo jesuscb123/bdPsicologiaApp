@@ -14,7 +14,7 @@ data class Psicologo(
     val user: Usuario,
 
     @Column(name = "numero_colegiado", nullable = false, unique = true)
-    val numeroColegioado: String = "",
+    val numeroColegiado: String = "",
 
     @Column(name = "especialidad", nullable = false)
     val especialidad: String = "",
