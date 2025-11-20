@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ServicioUsuario(val usuarioRepository: UsuarioRepository) : IServicioUsuario {
+    @Transactional
     override fun obtenerUsuarioByFireBaseId(idFirebase: String): Usuario? {
         return usuarioRepository.findByFirebaseUid(idFirebase)
     }

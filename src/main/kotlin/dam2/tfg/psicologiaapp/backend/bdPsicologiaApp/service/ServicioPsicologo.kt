@@ -16,20 +16,29 @@ class ServicioPsicologo(
         return psicologoRepository.findAll()
     }
 
-    override fun obtenerPsicologo(firebaseUsuarioId: String): Psicologo?{
+    @Transactional
+    override fun obtenerPsicologoFirebaseId(firebaseUsuarioId: String): Psicologo?{
         return psicologoRepository.findByIdFirebaseUsuario(firebaseUsuarioId)
     }
 
+    @Transactional
+    override fun obtenerPsicologoId(id: Long): Psicologo? {
+        return psicologoRepository.findById(id).orElse(null)
+    }
+
+    @Transactional
     override fun crearPsicologo(firebaseUidUsuario: String, psicologoRequest: PsicologoRequest): Psicologo?{
         val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUidUsuario) ?: throw IllegalStateException("No se puede crear un perfil para un usuario inexistente: ${firebaseUidUsuario} ")
 
-        if (psicologoRepository.existeUsuario(usuarioExiste)) return null
-
-        val nuevoPsicologo = Psicologo(
-            usuario = usuarioExiste,
-            numeroColegiado = psicologoRequest.numeroColegiado,
-            especialidad = psicologoRequest.especialidad
-        )
-        return psicologoRepository.save(nuevoPsicologo)
+        if (psicologoRepository.existeUsuario(usuarioExiste)){
+            return null
+        }else{
+            val nuevoPsicologo = Psicologo(
+                usuario = usuarioExiste,
+                numeroColegiado = psicologoRequest.numeroColegiado,
+                especialidad = psicologoRequest.especialidad
+            )
+            return psicologoRepository.save(nuevoPsicologo)
+        }
     }
 }

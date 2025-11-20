@@ -14,8 +14,7 @@ data class Paciente(
     val usuario: Usuario,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "psicologo_id", nullable = false, unique = true)
-    var psicologo: Psicologo,
-
+    var psicologo: Psicologo?,
     @OneToMany(
         mappedBy = "paciente",
         fetch = FetchType.LAZY
