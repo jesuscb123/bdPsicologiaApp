@@ -17,11 +17,5 @@ data class Usuario(
 
     @Column (name = "nombreUsuario", nullable = false, unique = true)
      var nombreUsuario: String,
-
-    @Column (name = "es_psicologo", nullable = false)
-    var esPsicologo: Boolean = false,
-
-    @Column (name = "es_paciente", nullable = false)
-    var esPaciente: Boolean = false
 ) {
 }
