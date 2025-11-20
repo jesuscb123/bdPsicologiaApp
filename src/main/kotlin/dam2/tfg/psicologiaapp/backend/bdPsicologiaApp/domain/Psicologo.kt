@@ -11,7 +11,7 @@ data class Psicologo(
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false, unique = true)
-    val user: Usuario,
+    val usuario: Usuario,
 
     @Column(name = "numero_colegiado", nullable = false, unique = true)
     val numeroColegiado: String,
