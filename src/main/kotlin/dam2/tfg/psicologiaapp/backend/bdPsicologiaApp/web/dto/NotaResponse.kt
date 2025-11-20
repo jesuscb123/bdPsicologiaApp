@@ -6,5 +6,4 @@ data class NotaResponse(
     val descripcion: String,
     val paciente: PacienteResponse,
     val psicologo: PsicologoResponse
-) {
-}
+)
