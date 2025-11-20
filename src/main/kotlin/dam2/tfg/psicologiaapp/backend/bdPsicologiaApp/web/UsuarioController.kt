@@ -34,14 +34,6 @@ class UsuarioController(
     }
 
     @PostMapping
-    fun crearUsuario(@RequestBody request: UsuarioRequest, fireBaseUid: String, email: String): ResponseEntity<UsuarioResponse> {
-        val usuarioGuardado = servicioUsuario.crearUsuario(fireBaseUid, email, request)
-
-        return ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.id}"))
-            .body(UsuarioMapper.toResponse(usuarioGuardado))
-    }
-
-    @PostMapping
     fun crearUsuario(
         @RequestHeader("Authorization") authorizationHeader: String, // Recibimos el token de la cabecera
         @RequestBody usuarioRequest: UsuarioRequest
@@ -51,7 +43,7 @@ class UsuarioController(
         val usuarioFirebase = firebaseService.getUserFromToken(authorizationHeader)
             ?: return errorTokenExpirado()
 
-        // 2. Opcional pero recomendado: Comprobamos si un usuario con ese UID ya existe en nuestra DB
+        // 2.Comprobamos si un usuario con ese UID ya existe en nuestra DB
         if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
             return errorUsuarioExiste(usuarioFirebase)
         }
