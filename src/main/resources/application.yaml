@@ -1,3 +1,23 @@
 spring:
   application:
     name: bdPsicologiaApp
+
+  # --- CONFIGURACIÓN DE LA CONEXIÓN A LA BASE DE DATOS ---
+  datasource:
+    url: jdbc:postgresql://localhost:5432/psicologia_db
+    username: postgres
+    password: 16581662 # <-- ¡RECUERDA CAMBIAR ESTO!
+
+  # --- CONFIGURACIÓN DE JPA/HIBERNATE ---
+  jpa:
+    hibernate:
+      # 'update' intenta actualizar la estructura de la BD.
+      ddl-auto: update
+    # Muestra por consola las sentencias SQL. Esencial para depurar.
+    show-sql: true
+
+    # --- ¡LA LÍNEA CLAVE QUE SOLUCIONA EL ERROR! ---
+    # Le decimos explícitamente a Hibernate que hable el "idioma" de PostgreSQL.
+    # Esto elimina cualquier ambigüedad.
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+

@@ -32,7 +32,7 @@ class ServicioPaciente(
     override fun crearPaciente(firebaseUsuarioId: String, pacienteRequest: PacienteRequest):Paciente?{
         val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUsuarioId) ?: throw IllegalStateException("No se puede crear un perfil para un usuario inexistente: ${firebaseUsuarioId}")
 
-        if (pacienteRepository.existeUsuario(usuarioExiste)) return null
+        if (pacienteRepository.existsByUsuario(usuarioExiste)) return null
 
         var psicologoAsociado: Psicologo? = null
         if (pacienteRequest.psicologoId != null){

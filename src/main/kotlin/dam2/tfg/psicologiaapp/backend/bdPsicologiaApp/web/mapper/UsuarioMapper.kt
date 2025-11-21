@@ -17,9 +17,7 @@ object UsuarioMapper {
         return UsuarioResponse(
             usuario.id!!,
             usuario.email,
-            usuario.nombreUsuario,
-            usuario.esPsicologo,
-            usuario.esPaciente
+            usuario.nombreUsuario
         )
     }
 

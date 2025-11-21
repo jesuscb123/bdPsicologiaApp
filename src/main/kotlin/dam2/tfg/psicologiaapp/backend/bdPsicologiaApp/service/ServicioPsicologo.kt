@@ -30,7 +30,7 @@ class ServicioPsicologo(
     override fun crearPsicologo(firebaseUidUsuario: String, psicologoRequest: PsicologoRequest): Psicologo?{
         val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUidUsuario) ?: throw IllegalStateException("No se puede crear un perfil para un usuario inexistente: ${firebaseUidUsuario} ")
 
-        if (psicologoRepository.existeUsuario(usuarioExiste)){
+        if (psicologoRepository.existsByUsuario(usuarioExiste)){
             return null
         }else{
             val nuevoPsicologo = Psicologo(
