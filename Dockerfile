@@ -1,4 +1,4 @@
------ STAGE 1: build -----
+# ----- STAGE 1: build -----
 FROM gradle:8.5-jdk21 AS build
 
 WORKDIR /app
@@ -6,7 +6,7 @@ COPY . .
 RUN chmod +x gradlew
 RUN ./gradlew clean build -x test
 
------ STAGE 2: run -----
+# ----- STAGE 2: run -----
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
