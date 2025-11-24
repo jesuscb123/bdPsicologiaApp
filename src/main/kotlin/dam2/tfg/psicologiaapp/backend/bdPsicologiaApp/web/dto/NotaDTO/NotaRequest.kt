@@ -1,4 +1,4 @@
-package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto
+package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO
 
 import jakarta.validation.constraints.NotBlank
 

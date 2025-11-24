@@ -2,8 +2,8 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PsicologoRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
 
 
 object PsicologoMapper {
@@ -15,7 +15,7 @@ object PsicologoMapper {
         )
     }
 
-    fun toResponse(psicologo: Psicologo): PsicologoResponse{
+    fun toResponse(psicologo: Psicologo): PsicologoResponse {
         return PsicologoResponse(
             id = psicologo.id!!,
             numeroColegiado = psicologo.numeroColegiado,

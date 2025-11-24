@@ -2,7 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

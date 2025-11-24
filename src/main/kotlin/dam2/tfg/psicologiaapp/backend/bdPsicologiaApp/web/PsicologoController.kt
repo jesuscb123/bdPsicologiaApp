@@ -3,12 +3,9 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PsicologoRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PsicologoResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.UsuarioRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -52,7 +49,8 @@ class PsicologoController(
     @PostMapping
     fun crearPsicologo(
         @RequestHeader("Authorization") authorizationHeader: String,
-        @RequestBody psicologoRequest: PsicologoRequest): ResponseEntity<Any>{
+        @RequestBody psicologoRequest: PsicologoRequest
+    ): ResponseEntity<Any>{
         try{
             val usuarioFirebase = firebaseService.getUserFromToken(authorizationHeader)
                 ?: return errorTokenExpirado()

@@ -1,8 +1,8 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.UsuarioRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.UsuarioResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 
 object UsuarioMapper {
     fun toEntity(request: UsuarioRequest, fireBaseUid: String, email: String): Usuario{
@@ -13,7 +13,7 @@ object UsuarioMapper {
         )
     }
 
-    fun toResponse(usuario: Usuario): UsuarioResponse{
+    fun toResponse(usuario: Usuario): UsuarioResponse {
         return UsuarioResponse(
             usuario.id!!,
             usuario.email,
