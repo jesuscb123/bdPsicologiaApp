@@ -25,12 +25,12 @@ class UsuarioController(
     }
 
     @GetMapping("/{fireBaseUid}")
-    fun obtenerUsuarioByFireBaseId(@PathVariable fireBaseUid: String): ResponseEntity<UsuarioResponse>?{
+    fun obtenerUsuarioByFireBaseId(@PathVariable fireBaseUid: String): ResponseEntity<UsuarioResponse>{
         val usuario = servicioUsuario.obtenerUsuarioByFireBaseId(fireBaseUid)
         return if (usuario != null){
             ResponseEntity.ok(UsuarioMapper.toResponse(usuario))
         }else{
-            null
+            ResponseEntity.notFound().build()
         }
     }
 
