@@ -34,8 +34,6 @@ class UsuarioController(
         }
     }
 
-    // En UsuarioController.kt
-
     @PostMapping
     fun crearUsuario(
         @RequestHeader("Authorization") authorizationHeader: String,
