@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface PsicologoRepository : JpaRepository<Psicologo, Long> {
-    @Query("SELECT p FROM Psicologo p WHERE p.usuario.firebaseUid = :fireBaseId")
+    @Query("SELECT p FROM Psicologo p WHERE p.usuario.firebaseUid = :firebaseUidUsuario")
     fun findByIdFirebaseUsuario(firebaseUidUsuario: String): Psicologo?
     fun existsByUsuario(usuario: Usuario): Boolean
 }
