@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.net.URI
 
 @RestController
+@CrossOrigin(origins = ["http://localhost:4200"])
 @RequestMapping("/api/usuarios")
 class UsuarioController(
    private val servicioUsuario: IServicioUsuario,
