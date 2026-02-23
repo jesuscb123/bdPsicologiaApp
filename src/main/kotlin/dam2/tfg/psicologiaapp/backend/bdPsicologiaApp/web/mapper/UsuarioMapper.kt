@@ -16,7 +16,6 @@ object UsuarioMapper {
     fun toResponse(usuario: Usuario): UsuarioResponse {
         return UsuarioResponse(
             usuario.id!!,
-            usuario.firebaseUid,
             usuario.email,
             usuario.nombreUsuario
         )
