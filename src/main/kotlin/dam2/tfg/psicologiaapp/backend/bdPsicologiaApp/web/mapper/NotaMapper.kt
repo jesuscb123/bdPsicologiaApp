@@ -13,7 +13,7 @@ object NotaMapper {
             asunto = nota.asunto,
             descripcion = nota.descripcion,
             paciente = PacienteMapper.toResponse(nota.paciente),
-            psicologo = PsicologoMapper.toResponse(nota.psicologo)
+            psicologo = PsicologoMapper.toResumenResponse(nota.psicologo)
         )
     }
 

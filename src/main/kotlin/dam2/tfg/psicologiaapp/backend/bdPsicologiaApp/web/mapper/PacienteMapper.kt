@@ -18,7 +18,7 @@ object PacienteMapper {
     fun toResponse(paciente: Paciente): PacienteResponse {
         return PacienteResponse(
             id = paciente.id!!,
-            psicologo = PsicologoMapper.toResponse(paciente.psicologo!!),
+            psicologo = PsicologoMapper.toResumenResponse(paciente.psicologo!!),
             usuario = UsuarioMapper.toResponse(paciente.usuario)
         )
     }
