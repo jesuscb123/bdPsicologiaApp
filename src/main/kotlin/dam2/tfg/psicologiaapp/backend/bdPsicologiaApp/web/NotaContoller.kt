@@ -5,16 +5,14 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaReques
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.*
 import java.net.URI
 
+@RestController
+@RequestMapping("/api/notas")
 class NotaContoller(
     private val servicioNota: IServicioNota
 ) {
-    // Ejemplo de URL: GET /api/notas/psicologo/firebaseId/abc1234/paciente/5
     @GetMapping("/psicologo/firebaseId/{firebaseId}/paciente/{pacienteId}")
     fun obtenerNotasParaPsicologo(
         @PathVariable firebaseId: String,
