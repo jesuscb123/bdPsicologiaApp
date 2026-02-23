@@ -30,13 +30,18 @@ class ServicioPaciente(
 
     @Transactional
     override fun crearPaciente(firebaseUsuarioId: String, pacienteRequest: PacienteRequest):Paciente?{
-        val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUsuarioId) ?: throw IllegalStateException("No se puede crear un perfil para un usuario inexistente: ${firebaseUsuarioId}")
+        val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUsuarioId) ?: throw IllegalStateException("No se puede crear un paciente para un usuario inexistente: ${firebaseUsuarioId}")
 
         if (pacienteRepository.existsByUsuario(usuarioExiste)) return null
 
         var psicologoAsociado: Psicologo? = null
-        if (pacienteRequest.psicologoId != null){
-            psicologoAsociado = servicioPsicologo.obtenerPsicologoId(pacienteRequest.psicologoId) ?: throw IllegalStateException("El psicólogo con id ${pacienteRequest.psicologoId} no existe}")
+
+        if (pacienteRequest.psicologoId != null) {
+            psicologoAsociado = servicioPsicologo.obtenerPsicologoId(pacienteRequest.psicologoId)
+                ?: throw IllegalStateException("El psicólogo con id ${pacienteRequest.psicologoId} no existe}")
+            if (usuarioExiste.id == psicologoAsociado.id){
+                throw java.lang.IllegalStateException("Un psicólogo ")
+            }
         }
 
         val nuevoPaciente = Paciente(
