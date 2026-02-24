@@ -8,5 +8,5 @@ data class PsicologoResponse(
     val numeroColegiado: String,
     val especialidad: String,
     val usuario: UsuarioResponse,
-    val fotoPerfil: String?
+    val fotoPerfilUrl: String?
 )
