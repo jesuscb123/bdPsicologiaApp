@@ -7,6 +7,6 @@ data class PsicologoResponse(
     val id: Long?,
     val numeroColegiado: String,
     val especialidad: String,
-    val usuario: UsuarioResponse
-) {
-}
+    val usuario: UsuarioResponse,
+    val fotoPerfil: String?
+)

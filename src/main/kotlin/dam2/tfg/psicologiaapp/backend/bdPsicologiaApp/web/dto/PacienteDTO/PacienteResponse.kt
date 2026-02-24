@@ -1,6 +1,5 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponseResumen
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 
