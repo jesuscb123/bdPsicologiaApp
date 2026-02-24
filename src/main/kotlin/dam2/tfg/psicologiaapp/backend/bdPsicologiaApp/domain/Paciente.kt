@@ -13,7 +13,7 @@ data class Paciente(
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     val usuario: Usuario,
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "psicologo_id", nullable = false, unique = true)
+    @JoinColumn(name = "psicologo_id", nullable = false)
     var psicologo: Psicologo?,
     @OneToMany(
         mappedBy = "paciente",
