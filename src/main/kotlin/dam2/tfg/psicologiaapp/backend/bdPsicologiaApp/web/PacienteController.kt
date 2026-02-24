@@ -57,7 +57,7 @@ class PacienteController(
 
             return guardarPaciente(usuarioFirebase, pacienteRequest)
         }catch (e: Exception){
-            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Error interno del servidor.")
+            return ResponseEntity.status(500).body("Error técnico: ${e.message} | Causa: ${e.cause}")
         }
     }
 
