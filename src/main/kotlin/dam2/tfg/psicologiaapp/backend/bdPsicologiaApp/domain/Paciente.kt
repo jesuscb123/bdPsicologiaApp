@@ -3,7 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 import jakarta.persistence.*
 
 @Entity
-@Table (name = "PACIENTES")
+@Table (name = "PACIENTES_v2")
 data class Paciente(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
