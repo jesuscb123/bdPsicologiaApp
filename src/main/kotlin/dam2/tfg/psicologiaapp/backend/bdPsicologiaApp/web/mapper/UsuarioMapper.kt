@@ -9,7 +9,8 @@ object UsuarioMapper {
         return Usuario(
             firebaseUid = fireBaseUid,
             email = email,
-            nombreUsuario = request.nombreUsuario
+            nombreUsuario = request.nombreUsuario,
+            fotoPerfilUrl = request.fotoPerfilUrl
         )
     }
 
@@ -17,7 +18,8 @@ object UsuarioMapper {
         return UsuarioResponse(
             usuario.id!!,
             usuario.email,
-            usuario.nombreUsuario
+            usuario.nombreUsuario,
+            usuario.fotoPerfilUrl
         )
     }
 

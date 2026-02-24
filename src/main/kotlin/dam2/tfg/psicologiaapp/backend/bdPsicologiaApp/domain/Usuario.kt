@@ -17,5 +17,10 @@ data class Usuario(
 
     @Column (name = "nombreUsuario", nullable = false, unique = true)
      var nombreUsuario: String,
+
+    @Lob
+    @Column(name = "foto_perfil", columnDefinition = "TEXT")
+    var fotoPerfilUrl: String? = null
+
 ) {
 }

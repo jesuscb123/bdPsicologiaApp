@@ -7,6 +7,5 @@ data class PsicologoResponse(
     val id: Long?,
     val numeroColegiado: String,
     val especialidad: String,
-    val usuario: UsuarioResponse,
-    val fotoPerfilUrl: String?
+    val usuario: UsuarioResponse
 )

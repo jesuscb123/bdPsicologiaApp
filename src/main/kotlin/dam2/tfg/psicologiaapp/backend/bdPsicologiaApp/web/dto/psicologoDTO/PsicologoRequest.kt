@@ -5,5 +5,4 @@ import jakarta.validation.constraints.NotBlank
 data class PsicologoRequest(
     @field:NotBlank val numeroColegiado: String,
     val especialidad: String,
-    val fotoPerfilUrl: String?
 )

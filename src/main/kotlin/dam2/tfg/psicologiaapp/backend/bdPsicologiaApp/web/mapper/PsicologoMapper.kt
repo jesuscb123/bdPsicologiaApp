@@ -21,8 +21,7 @@ object PsicologoMapper {
             id = psicologo.id!!,
             numeroColegiado = psicologo.numeroColegiado,
             especialidad = psicologo.especialidad,
-            usuario = UsuarioMapper.toResponse(psicologo.usuario),
-            fotoPerfilUrl = psicologo.fotoPerfilUrl
+            usuario = UsuarioMapper.toResponse(psicologo.usuario)
         )
     }
 
@@ -31,7 +30,7 @@ object PsicologoMapper {
             id = psicologo.id,
             especialidad = psicologo.especialidad,
             nombreUsuario = psicologo.usuario.nombreUsuario,
-            fotoPerfilUrl = psicologo.fotoPerfilUrl
+            fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl ?: ""
         )
     }
 
