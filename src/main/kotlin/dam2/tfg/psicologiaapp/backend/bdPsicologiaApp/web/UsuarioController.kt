@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import com.google.firebase.auth.FirebaseAuthException
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioRegistro
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
@@ -17,7 +18,8 @@ import java.net.URI
 @RequestMapping("/api/usuarios")
 class UsuarioController(
    private val servicioUsuario: IServicioUsuario,
-    private val firebaseService: FirebaseService
+    private val firebaseService: FirebaseService,
+    private val servicioRegistro: IServicioRegistro
 ) {
 
     @GetMapping
@@ -73,6 +75,32 @@ class UsuarioController(
     private fun guardarUsuario(usuarioFirebase: FirebaseUserData, usuarioRequest: UsuarioRequest): ResponseEntity<Any>{
         val usuarioGuardado = servicioUsuario.crearUsuario(usuarioFirebase.uid, usuarioFirebase.email, usuarioRequest)
         return ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.firebaseUid}")).body(UsuarioMapper.toResponse(usuarioGuardado))
+    }
+
+    @PostMapping("/registro-completo")
+    fun crearUsuarioCompleto(
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @RequestBody usuarioRequest: UsuarioRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val token = authorizationHeader.substring(7).trim()
+            val usuarioFirebase = firebaseService.getUserFromToken(token)
+                ?: return errorTokenExpirado()
+
+            if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
+                return errorUsuarioExiste(usuarioFirebase)
+            }
+
+            val usuarioCreado = servicioRegistro.registrarTodo(usuarioFirebase, usuarioRequest)
+
+            ResponseEntity.created(URI.create("/api/usuarios/${usuarioCreado.firebaseUid}"))
+                .body(UsuarioMapper.toResponse(usuarioCreado))
+
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en el registro: ${e.message}")
+        }
     }
 
     // FUNCIONES ERRORES

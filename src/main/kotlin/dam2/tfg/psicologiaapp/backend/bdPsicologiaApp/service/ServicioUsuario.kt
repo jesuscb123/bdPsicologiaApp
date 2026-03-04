@@ -1,6 +1,8 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
@@ -8,7 +10,12 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class ServicioUsuario(val usuarioRepository: UsuarioRepository) : IServicioUsuario {
+class ServicioUsuario(
+    private val usuarioRepository: UsuarioRepository,
+    private val pacienteRepository: PacienteRepository,
+    private val psicologoRepository: PsicologoRepository
+
+    ) : IServicioUsuario {
     @Transactional
     override fun obtenerUsuarioByFireBaseId(idFirebase: String): Usuario? {
         return usuarioRepository.findByFirebaseUid(idFirebase)
