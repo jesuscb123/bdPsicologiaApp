@@ -34,3 +34,11 @@ data class PacienteResponse(
     val psicologoId: Long?
 
 ) : UsuarioResponse()
+
+data class UsuarioBasicoResponse(
+    override val id: Long,
+    override val firebaseUid: String,
+    override val nombreUsuario: String,
+    override val fotoPerfilUrl: String?,
+    override val rol: String = "SIN_ROL"
+) : UsuarioResponse()

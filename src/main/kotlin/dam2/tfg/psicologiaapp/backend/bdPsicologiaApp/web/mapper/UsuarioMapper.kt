@@ -1,6 +1,7 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioBasicoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 
@@ -14,13 +15,12 @@ object UsuarioMapper {
         )
     }
 
-    fun toResponse(usuario: Usuario): UsuarioResponse {
-        return UsuarioResponse(
-            usuario.id!!,
-            usuario.firebaseUid,
-            usuario.email,
-            usuario.nombreUsuario,
-            usuario.fotoPerfilUrl
+    fun toResponse(usuario: Usuario): UsuarioBasicoResponse {
+        return UsuarioBasicoResponse(
+            id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
+            firebaseUid = usuario.firebaseUid,
+            nombreUsuario = usuario.nombreUsuario,
+            fotoPerfilUrl = usuario.fotoPerfilUrl
         )
     }
 

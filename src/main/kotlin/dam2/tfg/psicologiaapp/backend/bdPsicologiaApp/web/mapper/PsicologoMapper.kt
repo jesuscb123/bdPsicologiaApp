@@ -2,7 +2,8 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 
 
 object PsicologoMapper {
@@ -16,20 +17,15 @@ object PsicologoMapper {
 
     fun toResponse(psicologo: Psicologo): PsicologoResponse {
         return PsicologoResponse(
-            id = psicologo.id!!,
+            id = psicologo.usuario.id ?: throw IllegalStateException("ID nulo"),
+            firebaseUid = psicologo.usuario.firebaseUid,
+            nombreUsuario = psicologo.usuario.nombreUsuario,
+            fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl,
+
             numeroColegiado = psicologo.numeroColegiado,
-            especialidad = psicologo.especialidad,
-            usuario = UsuarioMapper.toResponse(psicologo.usuario)
+            especialidad = psicologo.especialidad
         )
     }
 
-    fun toResumenResponse(psicologo: Psicologo): PsicologoResponseResumen {
-        return PsicologoResponseResumen(
-            id = psicologo.id,
-            especialidad = psicologo.especialidad,
-            nombreUsuario = psicologo.usuario.nombreUsuario,
-            fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl ?: ""
-        )
-    }
 
 }
