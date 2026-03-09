@@ -3,7 +3,6 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import com.google.firebase.auth.FirebaseAuthException
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioRegistro
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
