@@ -6,13 +6,13 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoReposi
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ServicioPsicologo(
-   private val psicologoRepository: PsicologoRepository,
-    private val servicioUsuario: IServicioUsuario
+   private val psicologoRepository: PsicologoRepository
 ) : IServicioPsicologo{
     @Transactional
     override fun obtenerPsicologos(): List<PsicologoResponse> {
@@ -22,13 +22,17 @@ class ServicioPsicologo(
     }
 
     @Transactional
-    override fun obtenerPsicologoFirebaseId(firebaseUsuarioId: String): Psicologo?{
-        return psicologoRepository.findByIdFirebaseUsuario(firebaseUsuarioId)
+    override fun obtenerPsicologoFirebaseId(firebaseUsuarioId: String): PsicologoResponse?{
+        return psicologoRepository.findByIdFirebaseUsuario(firebaseUsuarioId)?.let {
+            PsicologoMapper.toResponse(it)
+        }
     }
 
     @Transactional
-    override fun obtenerPsicologoId(id: Long): Psicologo? {
-        return psicologoRepository.findById(id).orElse(null)
+    override fun obtenerPsicologoId(id: Long): PsicologoResponse? {
+        return psicologoRepository.findByIdOrNull(id)?.let { psicologo ->
+            PsicologoMapper.toResponse(psicologo)
+        }
     }
 
     @Transactional
@@ -46,5 +50,11 @@ class ServicioPsicologo(
 
             return PsicologoMapper.toResponse(psicologo)
         }
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerEntidadPsicologo(id: Long): Psicologo {
+        return psicologoRepository.findByIdOrNull(id)
+            ?: throw IllegalStateException("El psicólogo con id $id no existe")
     }
 }

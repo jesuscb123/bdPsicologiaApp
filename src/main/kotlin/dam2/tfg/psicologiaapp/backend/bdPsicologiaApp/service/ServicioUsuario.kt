@@ -42,7 +42,7 @@ class ServicioUsuario(
 
         return when (request) {
             is PsicologoRequest -> servicioPsicologo.crearPsicologo(usuarioEntidad, request)
-            is PacienteRequest -> servicioPaciente.crearDesdeEntidad(usuarioEntidad, request)
+            is PacienteRequest -> servicioPaciente.crearPaciente(usuarioEntidad, request)
         }
     }
 

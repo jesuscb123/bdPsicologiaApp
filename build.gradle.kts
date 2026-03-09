@@ -28,6 +28,17 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.google.firebase:firebase-admin:9.2.0")
 
+	// --- LIBRERÍAS DE SEGURIDAD NUEVAS ---
+	implementation("org.springframework.boot:spring-boot-starter-security")
+
+	runtimeOnly("org.postgresql:postgresql")
+
+	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+
+	// --- LIBRERÍA DE TESTING DE SEGURIDAD (Opcional pero recomendada) ---
+	testImplementation("org.springframework.security:spring-security-test")
+
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

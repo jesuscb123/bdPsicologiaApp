@@ -8,9 +8,9 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 
@@ -30,7 +30,7 @@ class PsicologoController(
     fun obtenerPsicologoByFirebaseId(@PathVariable firebaseId: String): ResponseEntity<PsicologoResponse>? {
         val psicologo = servicioPsicologo.obtenerPsicologoFirebaseId(firebaseId)
         return if (psicologo != null) {
-            ResponseEntity.ok(PsicologoMapper.toResponse(psicologo))
+            ResponseEntity.ok(psicologo)
         } else {
             ResponseEntity.notFound().build()
         }
@@ -46,7 +46,7 @@ class PsicologoController(
         val psicologo = servicioPsicologo.obtenerPsicologoId(id)
 
         return if (psicologo != null){
-            ResponseEntity.ok(PsicologoMapper.toResponse(psicologo))
+            ResponseEntity.ok(psicologo)
         }else{
             ResponseEntity.notFound().build()
         }
@@ -54,24 +54,15 @@ class PsicologoController(
 
     @PostMapping
     fun crearPsicologo(
-        @RequestHeader("Authorization") authorizationHeader: String,
-        @RequestBody psicologoRequest: PsicologoRequest // Pedimos el tipo específico
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @RequestBody psicologoRequest: PsicologoRequest
     ): ResponseEntity<Any> {
+
         return try {
-            if (!authorizationHeader.startsWith("Bearer ", ignoreCase = true)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("El formato del token de autorización es incorrecto. Debe ser 'Bearer <token>'.")
-            }
-
-            val token = authorizationHeader.substring(7).trim()
-
-            val usuarioFirebase = firebaseService.getUserFromToken(token)
-                ?: return errorTokenExpirado()
-
             val psicologoResponse = servicioUsuario.crearUsuario(
-                usuarioFirebase.uid,
-                usuarioFirebase.email,
-                psicologoRequest
+                fireBaseUid = usuarioFirebase.uid,
+                email = usuarioFirebase.email,
+                request = psicologoRequest
             )
 
             ResponseEntity.created(URI.create("/api/psicologos/${psicologoResponse.id}"))
@@ -79,10 +70,6 @@ class PsicologoController(
 
         } catch (e: IllegalStateException) {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
-
-        } catch (e: FirebaseAuthException) {
-            ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Error al validar el token de Firebase: ${e.message}")
 
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

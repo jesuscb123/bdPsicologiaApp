@@ -2,52 +2,67 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Paciente
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PacienteMapper
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ServicioPaciente(
     val pacienteRepository: PacienteRepository,
-    val servicioUsuario: IServicioUsuario,
-    val servicioPsicologo: ServicioPsicologo
+    val servicioPsicologo: IServicioPsicologo
+
 ) : IServicioPaciente {
 
     @Transactional
-    override fun obtenerPacientes(): List<Paciente>{
-        return pacienteRepository.findAll()
+    override fun obtenerPacientes(): List<PacienteResponse>{
+       val pacientes =  pacienteRepository.findAll()
+
+        return pacientes.map { PacienteMapper.toResponse(it) }
     }
 
     @Transactional
-    override fun obtenerPacienteFirebaseId(firebaseUsuarioId: String): Paciente?{
-        return pacienteRepository.findByIdFirebaseUsuario(firebaseUsuarioId)
+    override fun obtenerPacienteFirebaseId(firebaseUsuarioId: String): PacienteResponse?{
+        return pacienteRepository.findByIdFirebaseUsuario(firebaseUsuarioId)?.let { PacienteMapper.toResponse(it) }
     }
 
-    override fun obtenerPacienteId(id: Long): Paciente?{
-        return pacienteRepository.findById(id).orElse(null)
+    override fun obtenerPacienteId(id: Long): PacienteResponse?{
+        return pacienteRepository.findByIdOrNull(id)?.let { paciente ->
+            PacienteMapper.toResponse(paciente)
+        }
     }
 
     @Transactional
-    override fun crearPaciente(firebaseUsuarioId: String, pacienteRequest: PacienteRequest):Paciente?{
-        val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUsuarioId) ?: throw IllegalStateException("No se puede crear un paciente para un usuario inexistente: ${firebaseUsuarioId}")
+    override fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse {
 
-        if (pacienteRepository.existsByUsuario(usuarioExiste)) return null
+        // 1. Cláusula de guarda: Verificar si ya es paciente
+        if (pacienteRepository.existsByUsuario(usuario)) {
+            throw IllegalStateException("El usuario ${usuario.nombreUsuario} ya es paciente")
+        }
 
+        // 2. Buscar la ENTIDAD Psicólogo si el paciente ha elegido uno
         var psicologoAsociado: Psicologo? = null
 
         if (pacienteRequest.psicologoId != null) {
-            psicologoAsociado = servicioPsicologo.obtenerPsicologoId(pacienteRequest.psicologoId)
-                ?: throw IllegalStateException("El psicólogo con id ${pacienteRequest.psicologoId} no existe}")
-            if (usuarioExiste.id == psicologoAsociado.id){
-                throw java.lang.IllegalStateException("Un psicólogo ")
+            psicologoAsociado = servicioPsicologo.obtenerEntidadPsicologo(pacienteRequest.psicologoId)
+
+            // Validar que no se asigne a sí mismo (Comparamos IDs de la tabla Usuarios)
+            if (usuario.id == psicologoAsociado.usuario.id) {
+                throw IllegalStateException("Un usuario no puede ser su propio psicólogo")
             }
         }
-
         val nuevoPaciente = Paciente(
-            usuario = usuarioExiste,
+            usuario = usuario,
             psicologo = psicologoAsociado
         )
-        return pacienteRepository.save(nuevoPaciente)
+
+        val pacienteGuardado = pacienteRepository.save(nuevoPaciente)
+
+        return PacienteMapper.toResponse(pacienteGuardado)
     }
 }

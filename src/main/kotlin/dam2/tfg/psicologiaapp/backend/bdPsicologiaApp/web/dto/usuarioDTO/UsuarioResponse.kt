@@ -30,6 +30,7 @@ data class PacienteResponse(
     override val firebaseUid: String,
     override val nombreUsuario: String,
     override val fotoPerfilUrl: String?,
-    override val rol: String = "PACIENTE"
+    override val rol: String = "PACIENTE",
+    val psicologoId: Long?
 
 ) : UsuarioResponse()

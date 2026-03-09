@@ -44,6 +44,8 @@ data class PacienteRequest(
     override val fotoPerfilUrl: String?,
 
     @field:NotBlank(message = "El rol es obligatorio")
-    override val rol: String = "PACIENTE"
+    override val rol: String = "PACIENTE",
+
+    val psicologoId: Long?
 
 ) : UsuarioRequest()
