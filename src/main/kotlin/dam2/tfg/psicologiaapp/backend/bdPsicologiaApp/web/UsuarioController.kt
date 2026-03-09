@@ -19,8 +19,6 @@ import java.net.URI
 @RequestMapping("/api/usuarios")
 class UsuarioController(
    private val servicioUsuario: IServicioUsuario,
-    private val firebaseService: FirebaseService,
-    private val servicioRegistro: IServicioRegistro
 ) {
 
     @GetMapping
@@ -60,30 +58,6 @@ class UsuarioController(
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error interno del servidor: ${e.message}")
-        }
-    }
-
-    @PostMapping("/registro-completo")
-    fun crearUsuarioCompleto(
-        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody usuarioRequest: UsuarioRequest
-    ): ResponseEntity<Any> {
-        return try {
-
-            if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
-                return errorUsuarioExiste(usuarioFirebase)
-            }
-
-
-            val usuarioCreado = servicioRegistro.registrarTodo(usuarioFirebase, usuarioRequest)
-
-            ResponseEntity.created(URI.create("/api/usuarios/${usuarioCreado.firebaseUid}"))
-                .body(UsuarioMapper.toResponse(usuarioCreado))
-
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en el registro: ${e.message}")
         }
     }
 
