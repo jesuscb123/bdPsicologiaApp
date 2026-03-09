@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 

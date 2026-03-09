@@ -1,8 +1,11 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,8 +15,10 @@ class ServicioPsicologo(
     private val servicioUsuario: IServicioUsuario
 ) : IServicioPsicologo{
     @Transactional
-    override fun obtenerPsicologos(): List<Psicologo> {
-        return psicologoRepository.findAll()
+    override fun obtenerPsicologos(): List<PsicologoResponse> {
+        val psicologos = psicologoRepository.findAll()
+
+        return psicologos.map { PsicologoMapper.toResponse(it) }
     }
 
     @Transactional
@@ -27,18 +32,19 @@ class ServicioPsicologo(
     }
 
     @Transactional
-    override fun crearPsicologo(firebaseUidUsuario: String, psicologoRequest: PsicologoRequest): Psicologo?{
-        val usuarioExiste = servicioUsuario.obtenerUsuarioByFireBaseId(firebaseUidUsuario) ?: throw IllegalStateException("No se puede crear un perfil para un usuario inexistente: ${firebaseUidUsuario} ")
+    override fun crearPsicologo(usuario: Usuario, psicologoRequest: PsicologoRequest): PsicologoResponse {
 
-        if (psicologoRepository.existsByUsuario(usuarioExiste)){
-            return null
+        if (psicologoRepository.existsByUsuario(usuario)){
+            throw IllegalStateException("El usuario ${usuario.nombreUsuario} ya es psicólogo")
         }else{
             val nuevoPsicologo = Psicologo(
-                usuario = usuarioExiste,
+                usuario = usuario,
                 numeroColegiado = psicologoRequest.numeroColegiado,
                 especialidad = psicologoRequest.especialidad
             )
-            return psicologoRepository.save(nuevoPsicologo)
+           val psicologo = psicologoRepository.save(nuevoPsicologo)
+
+            return PsicologoMapper.toResponse(psicologo)
         }
     }
 }

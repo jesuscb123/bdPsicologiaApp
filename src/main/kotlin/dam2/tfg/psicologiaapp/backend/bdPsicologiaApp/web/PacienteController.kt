@@ -4,7 +4,6 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Rol
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPaciente
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO.PacienteRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PacienteMapper
 import org.apache.http.HttpStatus

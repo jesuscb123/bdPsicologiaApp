@@ -2,9 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponseResumen
 
 
 object PsicologoMapper {

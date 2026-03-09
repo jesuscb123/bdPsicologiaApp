@@ -24,14 +24,14 @@ class UsuarioController(
 
     @GetMapping
     fun obtenerUsuarios(): List<UsuarioResponse>{
-        return servicioUsuario.obtenerUsuarios().map(UsuarioMapper::toResponse)
+        return servicioUsuario.obtenerUsuarios()
     }
 
     @GetMapping("/{fireBaseUid}")
     fun obtenerUsuarioByFireBaseId(@PathVariable fireBaseUid: String): ResponseEntity<UsuarioResponse>{
         val usuario = servicioUsuario.obtenerUsuarioByFireBaseId(fireBaseUid)
         return if (usuario != null){
-            ResponseEntity.ok(UsuarioMapper.toResponse(usuario))
+            ResponseEntity.ok(usuario)
         }else{
             ResponseEntity.notFound().build()
         }
@@ -74,7 +74,7 @@ class UsuarioController(
 
     private fun guardarUsuario(usuarioFirebase: FirebaseUserData, usuarioRequest: UsuarioRequest): ResponseEntity<Any>{
         val usuarioGuardado = servicioUsuario.crearUsuario(usuarioFirebase.uid, usuarioFirebase.email, usuarioRequest)
-        return ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.firebaseUid}")).body(UsuarioMapper.toResponse(usuarioGuardado))
+        return ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.firebaseUid}")).body(usuarioGuardado)
     }
 
     @PostMapping("/registro-completo")

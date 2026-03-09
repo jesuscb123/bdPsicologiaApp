@@ -1,11 +1,13 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
+import com.google.firebase.auth.FirebaseAuthException
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Rol
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,11 +18,12 @@ import java.net.URI
 @RequestMapping("/api/psicologos")
 class PsicologoController(
     private val servicioPsicologo: IServicioPsicologo,
+    private val servicioUsuario: IServicioUsuario,
     private val firebaseService: FirebaseService
 ) : IController {
     @GetMapping
     fun obtenerPsicologos(): List<PsicologoResponse> {
-        return servicioPsicologo.obtenerPsicologos().map(PsicologoMapper::toResponse)
+        return servicioPsicologo.obtenerPsicologos()
     }
 
     @GetMapping("/firebaseId/{firebaseId}")
@@ -52,27 +55,38 @@ class PsicologoController(
     @PostMapping
     fun crearPsicologo(
         @RequestHeader("Authorization") authorizationHeader: String,
-        @RequestBody psicologoRequest: PsicologoRequest
-    ): ResponseEntity<Any>{
-        try{
-            val usuarioFirebase = firebaseService.getUserFromToken(authorizationHeader)
+        @RequestBody psicologoRequest: PsicologoRequest // Pedimos el tipo específico
+    ): ResponseEntity<Any> {
+        return try {
+            if (!authorizationHeader.startsWith("Bearer ", ignoreCase = true)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("El formato del token de autorización es incorrecto. Debe ser 'Bearer <token>'.")
+            }
+
+            val token = authorizationHeader.substring(7).trim()
+
+            val usuarioFirebase = firebaseService.getUserFromToken(token)
                 ?: return errorTokenExpirado()
 
-          return guardarPsicologo(usuarioFirebase, psicologoRequest)
-        }catch (e: Exception){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor")
-        }
-    }
+            val psicologoResponse = servicioUsuario.crearUsuario(
+                usuarioFirebase.uid,
+                usuarioFirebase.email,
+                psicologoRequest
+            )
 
+            ResponseEntity.created(URI.create("/api/psicologos/${psicologoResponse.id}"))
+                .body(psicologoResponse)
 
-    private fun guardarPsicologo(usuarioFirebase: FirebaseUserData, psicologoRequest: PsicologoRequest): ResponseEntity<Any>{
-        val psicologoGuardado = servicioPsicologo.crearPsicologo(usuarioFirebase.uid, psicologoRequest)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
 
-        return if (psicologoGuardado !=  null){
-            val psicologoResponse = PsicologoMapper.toResponse(psicologoGuardado)
-            ResponseEntity.created(URI.create("/api/psicologos/${psicologoResponse.id}")).body(psicologoResponse)
-        }else{
-            errorExiste(usuarioFirebase, Rol.PSICOLOGO)
+        } catch (e: FirebaseAuthException) {
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Error al validar el token de Firebase: ${e.message}")
+
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
         }
     }
 }

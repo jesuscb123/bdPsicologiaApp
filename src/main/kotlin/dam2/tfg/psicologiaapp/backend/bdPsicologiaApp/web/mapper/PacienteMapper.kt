@@ -3,7 +3,6 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Paciente
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO.PacienteRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO.PacienteResponse
 
 object PacienteMapper {
