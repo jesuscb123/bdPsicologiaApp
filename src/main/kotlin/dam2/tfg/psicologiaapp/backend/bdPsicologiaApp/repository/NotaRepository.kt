@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface NotaRepository : JpaRepository<Nota, Long> {
+    @Query("SELECT n FROM Nota n WHERE n.paciente.id = :pacienteId AND n.psicologo.id = :psicologoId")
     fun obtenerNotasPacienteParaPsicologo(
         @Param("pacienteId") pacienteId: Long,
         @Param("psicologoId") psicologoId: Long
