@@ -39,19 +39,14 @@ class ServicioPaciente(
 
     @Transactional
     override fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse {
-
-        // 1. Cláusula de guarda: Verificar si ya es paciente
         if (pacienteRepository.existsByUsuario(usuario)) {
             throw IllegalStateException("El usuario ${usuario.nombreUsuario} ya es paciente")
         }
-
-        // 2. Buscar la ENTIDAD Psicólogo si el paciente ha elegido uno
         var psicologoAsociado: Psicologo? = null
 
         if (pacienteRequest.psicologoId != null) {
             psicologoAsociado = servicioPsicologo.obtenerEntidadPsicologo(pacienteRequest.psicologoId)
 
-            // Validar que no se asigne a sí mismo (Comparamos IDs de la tabla Usuarios)
             if (usuario.id == psicologoAsociado.usuario.id) {
                 throw IllegalStateException("Un usuario no puede ser su propio psicólogo")
             }
@@ -66,5 +61,9 @@ class ServicioPaciente(
         return PacienteMapper.toResponse(pacienteGuardado)
     }
 
+    override fun obtenerEntidadPacientePorFirebaseId(firebaseId: String): Paciente {
+        return pacienteRepository.findByIdFirebaseUsuario(firebaseId)
+            ?: throw IllegalStateException("El paciente no existe o el ID de Firebase es incorrecto")
+    }
 
 }

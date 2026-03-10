@@ -22,7 +22,7 @@ class NotaContoller(
         val notas = servicioNota.obtenerNotasPacienteParaPsicologo(firebaseId, pacienteId)
 
         return if (notas.isNotEmpty()) {
-            ResponseEntity.ok(notas.map(NotaMapper::toResponse))
+            ResponseEntity.ok(notas)
         } else {
             ResponseEntity.noContent().build()
         }
@@ -36,7 +36,7 @@ class NotaContoller(
         val nota = servicioNota.obtenerNotasPaciente(firebaseId)
 
         return if (nota != null) {
-            ResponseEntity.ok(NotaMapper.toResponse(nota))
+            ResponseEntity.ok(nota)
         } else {
             ResponseEntity.notFound().build()
         }
@@ -51,9 +51,7 @@ class NotaContoller(
         return try {
             val notaGuardada = servicioNota.crearNota(firebaseId, request)
 
-            val response = NotaMapper.toResponse(notaGuardada)
-
-            ResponseEntity.created(URI.create("/api/notas/${response.id}")).body(response)
+            ResponseEntity.created(URI.create("/api/notas/${notaGuardada.id}")).body(notaGuardada)
 
         } catch (e: IllegalStateException) {
             ResponseEntity.badRequest().build()

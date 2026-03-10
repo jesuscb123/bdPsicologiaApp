@@ -11,4 +11,5 @@ interface IServicioPaciente {
     fun obtenerPacienteId(id: Long): PacienteResponse?
     fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse
 
+    fun obtenerEntidadPacientePorFirebaseId(firebaseId: String): Paciente
 }

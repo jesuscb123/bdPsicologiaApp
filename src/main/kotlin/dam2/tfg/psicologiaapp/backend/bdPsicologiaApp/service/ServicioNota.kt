@@ -1,6 +1,5 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Nota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
@@ -34,23 +33,17 @@ class ServicioNota(
     }
 
     @Transactional
-    override fun crearNota(firebaseId: String, request: NotaRequest): NotaResponse {
+    override fun crearNota(firebaseId: String, notaRequest: NotaRequest): NotaResponse {
 
-        // 1. Obtenemos la ENTIDAD Paciente (¡Necesitamos un método interno en tu ServicioPaciente o usar el Repo!)
-        // Asumo que creas este método o usas pacienteRepository directamente.
         val paciente = servicioPaciente.obtenerEntidadPacientePorFirebaseId(firebaseId)
 
-        // 2. Extraemos la ENTIDAD Psicólogo que ya viene dentro del Paciente
         val psicologoAsignado = paciente.psicologo
             ?: throw IllegalStateException("No puedes crear una nota porque no tienes un psicólogo asignado")
 
-        // 3. Ahora sí, el Mapper recibe las ENTIDADES reales para construir la Nota
-        val nuevaNota = NotaMapper.toEntity(request, paciente, psicologoAsignado)
+        val nuevaNota = NotaMapper.toEntity(notaRequest, paciente, psicologoAsignado)
 
-        // 4. Guardamos en la base de datos (Esto nos devuelve la Entidad guardada con su ID autogenerado)
         val notaGuardada = notaRepository.save(nuevaNota)
 
-        // 5. ¡Pasamos la Entidad por el Mapper para devolver el DTO final!
         return NotaMapper.toResponse(notaGuardada)
     }
 }

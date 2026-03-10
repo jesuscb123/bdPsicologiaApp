@@ -9,5 +9,5 @@ interface IServicioNota {
 
     fun obtenerNotasPaciente(firebaseId: String): NotaResponse?
 
-    fun crearNota(firebaseId: String, notaRequest: NotaRequest): Nota
+    fun crearNota(firebaseId: String, notaRequest: NotaRequest): NotaResponse
 }
