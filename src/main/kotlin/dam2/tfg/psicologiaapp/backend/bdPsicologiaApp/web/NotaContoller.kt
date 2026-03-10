@@ -1,10 +1,13 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
+import org.apache.coyote.Response
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 
@@ -13,13 +16,12 @@ import java.net.URI
 class NotaContoller(
     private val servicioNota: IServicioNota
 ) {
-    @GetMapping("/psicologo/firebaseId/{firebaseId}/paciente/{pacienteId}")
+    @GetMapping("/pacientes/{pacienteId}")
     fun obtenerNotasParaPsicologo(
-        @PathVariable firebaseId: String,
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
     ): ResponseEntity<List<NotaResponse>> {
-
-        val notas = servicioNota.obtenerNotasPacienteParaPsicologo(firebaseId, pacienteId)
+        val notas = servicioNota.obtenerNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
 
         return if (notas.isNotEmpty()) {
             ResponseEntity.ok(notas)
@@ -28,18 +30,14 @@ class NotaContoller(
         }
     }
 
-    @GetMapping("/paciente/firebaseId/{firebaseId}")
+    @GetMapping
     fun obtenerMisNotas(
-        @PathVariable firebaseId: String
-    ): ResponseEntity<NotaResponse> {
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<List<NotaResponse>> {
 
-        val nota = servicioNota.obtenerNotasPaciente(firebaseId)
+        val notas = servicioNota.obtenerNotasPaciente(usuarioFirebase.uid)
 
-        return if (nota != null) {
-            ResponseEntity.ok(nota)
-        } else {
-            ResponseEntity.notFound().build()
-        }
+        return if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
     }
 
     @PostMapping("/paciente/firebaseId/{firebaseId}")

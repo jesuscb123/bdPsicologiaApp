@@ -19,7 +19,6 @@ import java.net.URI
 class PsicologoController(
     private val servicioPsicologo: IServicioPsicologo,
     private val servicioUsuario: IServicioUsuario,
-    private val firebaseService: FirebaseService
 ) : IController {
     @GetMapping
     fun obtenerPsicologos(): List<PsicologoResponse> {

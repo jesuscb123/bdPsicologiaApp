@@ -7,7 +7,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRespon
 interface IServicioNota {
     fun obtenerNotasPacienteParaPsicologo(firebaseId: String, pacienteId: Long): List<NotaResponse>
 
-    fun obtenerNotasPaciente(firebaseId: String): NotaResponse?
+    fun obtenerNotasPaciente(firebaseId: String): List<NotaResponse>
 
     fun crearNota(firebaseId: String, notaRequest: NotaRequest): NotaResponse
 }

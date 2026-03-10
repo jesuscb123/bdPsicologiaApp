@@ -15,7 +15,7 @@ interface NotaRepository : JpaRepository<Nota, Long> {
     ): List<Nota>
 
     @Query("SELECT n FROM Nota n WHERE n.paciente.usuario.firebaseUid = :fireBaseId")
-    fun obtenerByPacienteUsuarioFirebaseId(fireBaseId: String): Nota?
+    fun obtenerNotasByPacienteUsuarioFirebaseId(@Param("fireBaseId") fireBaseId: String): List<Nota>
 
 
 }

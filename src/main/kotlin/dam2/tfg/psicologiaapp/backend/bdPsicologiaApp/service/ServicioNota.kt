@@ -1,5 +1,6 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Nota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
@@ -28,8 +29,10 @@ class ServicioNota(
 
         return notas.map { NotaMapper.toResponse(it) }
     }
-    override fun obtenerNotasPaciente(firebaseId: String): NotaResponse?{
-        return notaRepository.obtenerByPacienteUsuarioFirebaseId(firebaseId)?.let { NotaMapper.toResponse(it) }
+    override fun obtenerNotasPaciente(firebaseId: String): List<NotaResponse>{
+        val notas = notaRepository.obtenerNotasByPacienteUsuarioFirebaseId(firebaseId)
+
+        return notas.map { NotaMapper.toResponse(it) }
     }
 
     @Transactional
