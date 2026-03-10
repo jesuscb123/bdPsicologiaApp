@@ -1,7 +1,7 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.PacienteDTO.PacienteResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 
 data class TareaResponse(
     val id: Long?,
