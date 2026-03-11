@@ -1,12 +1,10 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
-import com.google.firebase.auth.FirebaseAuthException
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -23,6 +21,14 @@ class UsuarioController(
     @GetMapping
     fun obtenerUsuarios(): List<UsuarioResponse>{
         return servicioUsuario.obtenerUsuarios()
+    }
+
+    @GetMapping("/me")
+    fun obtenerMiPerfil(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<UsuarioPerfilResponse> {
+        val perfil = servicioUsuario.obtenerPerfilUsuario(usuarioFirebase.uid)
+        return ResponseEntity.ok(perfil)
     }
 
     @GetMapping("/{fireBaseUid}")
@@ -58,12 +64,6 @@ class UsuarioController(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error interno del servidor: ${e.message}")
         }
-    }
-
-    // FUNCIONES ERRORES
-    private fun errorTokenExpirado(): ResponseEntity<Any>{
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token de autorización inválido o expirado.")
-
     }
 
     private fun errorUsuarioExiste(usuarioFirebase: FirebaseUserData): ResponseEntity<Any>{

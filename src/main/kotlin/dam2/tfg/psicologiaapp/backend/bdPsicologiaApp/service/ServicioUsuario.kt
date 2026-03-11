@@ -7,6 +7,10 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioReposito
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilBasicoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacientePerfilResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper.toResponse
@@ -16,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ServicioUsuario(
     private val usuarioRepository: UsuarioRepository,
+    private val psicologoRepository: PsicologoRepository,
+    private val pacienteRepository: PacienteRepository,
     private val servicioPsicologo: IServicioPsicologo,
     private val servicioPaciente: IServicioPaciente
     ) : IServicioUsuario {
@@ -44,6 +50,43 @@ class ServicioUsuario(
             is PsicologoRequest -> servicioPsicologo.crearPsicologo(usuarioEntidad, request)
             is PacienteRequest -> servicioPaciente.crearPaciente(usuarioEntidad, request)
         }
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerPerfilUsuario(firebaseUid: String): UsuarioPerfilResponse {
+        val usuario = usuarioRepository.findByFirebaseUid(firebaseUid)
+            ?: throw IllegalStateException("El usuario no existe")
+
+        psicologoRepository.findByIdFirebaseUsuario(firebaseUid)?.let { psicologo ->
+            return PsicologoPerfilResponse(
+                id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
+                firebaseUid = usuario.firebaseUid,
+                nombreUsuario = usuario.nombreUsuario,
+                email = usuario.email,
+                fotoPerfilUrl = usuario.fotoPerfilUrl,
+                numeroColegiado = psicologo.numeroColegiado,
+                especialidad = psicologo.especialidad
+            )
+        }
+
+        pacienteRepository.findByIdFirebaseUsuario(firebaseUid)?.let { paciente ->
+            return PacientePerfilResponse(
+                id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
+                firebaseUid = usuario.firebaseUid,
+                nombreUsuario = usuario.nombreUsuario,
+                email = usuario.email,
+                fotoPerfilUrl = usuario.fotoPerfilUrl,
+                psicologoId = paciente.psicologo?.id
+            )
+        }
+
+        return UsuarioPerfilBasicoResponse(
+            id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
+            firebaseUid = usuario.firebaseUid,
+            nombreUsuario = usuario.nombreUsuario,
+            email = usuario.email,
+            fotoPerfilUrl = usuario.fotoPerfilUrl
+        )
     }
 
     private fun obtenerOCrearEntidadUsuario(fireBaseUid: String, email: String, request: UsuarioRequest): Usuario {
