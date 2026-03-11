@@ -1,9 +1,6 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
-import com.google.firebase.auth.FirebaseAuthException
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Rol
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
@@ -48,31 +45,6 @@ class PsicologoController(
             ResponseEntity.ok(psicologo)
         }else{
             ResponseEntity.notFound().build()
-        }
-    }
-
-    @PostMapping
-    fun crearPsicologo(
-        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody psicologoRequest: PsicologoRequest
-    ): ResponseEntity<Any> {
-
-        return try {
-            val psicologoResponse = servicioUsuario.crearUsuario(
-                fireBaseUid = usuarioFirebase.uid,
-                email = usuarioFirebase.email,
-                request = psicologoRequest
-            )
-
-            ResponseEntity.created(URI.create("/api/psicologos/${psicologoResponse.id}"))
-                .body(psicologoResponse)
-
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message)
-
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
         }
     }
 }
