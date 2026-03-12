@@ -5,6 +5,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.lang.IllegalStateException
@@ -48,5 +49,20 @@ class ServicioNota(
         val notaGuardada = notaRepository.save(nuevaNota)
 
         return NotaMapper.toResponse(notaGuardada)
+    }
+
+    @Transactional
+    override fun actualizarNota(firebaseUidPaciente: String, notaId: Long, request: NotaRequest): NotaResponse {
+        val nota = notaRepository.findByIdOrNull(notaId)
+            ?: throw IllegalStateException("La nota no existe")
+
+        if (nota.paciente.usuario.firebaseUid != firebaseUidPaciente) {
+            throw SecurityException("No tienes permiso para actualizar esta nota")
+        }
+
+        nota.asunto = request.asunto
+        nota.descripcion = request.descripcion
+        val actualizada = notaRepository.save(nota)
+        return NotaMapper.toResponse(actualizada)
     }
 }

@@ -10,4 +10,6 @@ interface IServicioNota {
     fun obtenerNotasPaciente(firebaseId: String): List<NotaResponse>
 
     fun crearNota(firebaseId: String, notaRequest: NotaRequest): NotaResponse
+
+    fun actualizarNota(firebaseUidPaciente: String, notaId: Long, request: NotaRequest): NotaResponse
 }

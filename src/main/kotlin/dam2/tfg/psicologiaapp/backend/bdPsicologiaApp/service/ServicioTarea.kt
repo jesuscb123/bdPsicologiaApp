@@ -6,6 +6,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteReposit
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.TareaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRealizadaRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.TareaMapper
@@ -64,6 +65,25 @@ class ServicioTarea(
         }
 
         tarea.realizada = request.realizada
+        val actualizada = tareaRepository.save(tarea)
+        return TareaMapper.toResponse(actualizada)
+    }
+
+    @Transactional
+    override fun actualizarTarea(
+        firebaseUidPsicologo: String,
+        tareaId: Long,
+        request: TareaActualizarRequest
+    ): TareaResponse {
+        val tarea = tareaRepository.findByIdOrNull(tareaId)
+            ?: throw IllegalStateException("La tarea no existe")
+
+        if (tarea.psicologo.usuario.firebaseUid != firebaseUidPsicologo) {
+            throw SecurityException("No tienes permiso para actualizar esta tarea")
+        }
+
+        tarea.tituloTarea = request.titulo
+        tarea.descripcionTarea = request.descripcion
         val actualizada = tareaRepository.save(tarea)
         return TareaMapper.toResponse(actualizada)
     }

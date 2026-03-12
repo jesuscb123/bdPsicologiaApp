@@ -5,8 +5,9 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
-import org.apache.coyote.Response
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -56,4 +57,22 @@ class NotaContoller(
         }
     }
 
+    @PutMapping("/{notaId}")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun actualizarNota(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable notaId: Long,
+        @RequestBody request: NotaRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val actualizada = servicioNota.actualizarNota(usuarioFirebase.uid, notaId, request)
+            ResponseEntity.ok(actualizada)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
+        }
+    }
 }
