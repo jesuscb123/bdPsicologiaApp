@@ -2,9 +2,12 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PacienteMapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -12,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ServicioPsicologo(
-   private val psicologoRepository: PsicologoRepository
+   private val psicologoRepository: PsicologoRepository,
+   private val pacienteRepository: PacienteRepository
 ) : IServicioPsicologo{
     @Transactional
     override fun obtenerPsicologos(): List<PsicologoResponse> {
@@ -66,5 +70,13 @@ class ServicioPsicologo(
     override fun obtenerEntidadPsicologo(id: Long): Psicologo {
         return psicologoRepository.findByIdOrNull(id)
             ?: throw IllegalStateException("El psicólogo con id $id no existe")
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerPacientesPorFirebaseId(firebaseUidPsicologo: String): List<PacienteResponse> {
+        val psicologo = psicologoRepository.findByIdFirebaseUsuario(firebaseUidPsicologo)
+            ?: return emptyList()
+        val pacientes = pacienteRepository.findAllByPsicologo(psicologo)
+        return pacientes.map { PacienteMapper.toResponse(it) }
     }
 }

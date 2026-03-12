@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import org.springframework.http.HttpStatus
@@ -57,5 +58,15 @@ class PsicologoController(
         }else{
             ResponseEntity.notFound().build()
         }
+    }
+
+    @GetMapping("/me/pacientes")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun obtenerMisPacientes(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<List<PacienteResponse>> {
+        val pacientes = servicioPsicologo.obtenerPacientesPorFirebaseId(usuarioFirebase.uid)
+        return if (pacientes.isEmpty()) ResponseEntity.noContent().build()
+        else ResponseEntity.ok(pacientes)
     }
 }

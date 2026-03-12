@@ -14,4 +14,6 @@ interface IServicioPaciente {
     fun obtenerEntidadPacientePorFirebaseId(firebaseId: String): Paciente
 
     fun buscarPacientesPorNombre(nombreUsuario: String): List<PacienteResponse>
+
+    fun actualizarPsicologo(firebaseUidPaciente: String, psicologoId: Long): PacienteResponse
 }

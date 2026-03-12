@@ -78,4 +78,16 @@ class ServicioPaciente(
             ?: throw IllegalStateException("El paciente no existe o el ID de Firebase es incorrecto")
     }
 
+    @Transactional
+    override fun actualizarPsicologo(firebaseUidPaciente: String, psicologoId: Long): PacienteResponse {
+        val paciente = pacienteRepository.findByIdFirebaseUsuario(firebaseUidPaciente)
+            ?: throw IllegalStateException("El paciente no existe o el ID de Firebase es incorrecto")
+        val psicologo = servicioPsicologo.obtenerEntidadPsicologo(psicologoId)
+        if (paciente.usuario.id == psicologo.usuario.id) {
+            throw IllegalStateException("Un usuario no puede ser su propio psicólogo")
+        }
+        paciente.psicologo = psicologo
+        val guardado = pacienteRepository.save(paciente)
+        return PacienteMapper.toResponse(guardado)
+    }
 }

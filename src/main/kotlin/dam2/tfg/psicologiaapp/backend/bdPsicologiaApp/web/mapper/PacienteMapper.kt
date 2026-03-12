@@ -21,7 +21,8 @@ object PacienteMapper {
             firebaseUid = paciente.usuario.firebaseUid,
             nombreUsuario = paciente.usuario.nombreUsuario,
             fotoPerfilUrl = paciente.usuario.fotoPerfilUrl,
-            psicologoId = paciente.psicologo?.id
+            psicologoId = paciente.psicologo?.id,
+            idPaciente = paciente.id ?: throw IllegalStateException("ID de paciente nulo")
         )
     }
 

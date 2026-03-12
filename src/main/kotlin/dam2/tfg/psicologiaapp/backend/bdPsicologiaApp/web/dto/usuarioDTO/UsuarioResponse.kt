@@ -31,8 +31,9 @@ data class PacienteResponse(
     override val nombreUsuario: String,
     override val fotoPerfilUrl: String?,
     override val rol: String = "PACIENTE",
-    val psicologoId: Long?
-
+    val psicologoId: Long?,
+    /** ID de la entidad Paciente (tabla PACIENTES_v2), usado en rutas como /api/notas/pacientes/{pacienteId} */
+    val idPaciente: Long
 ) : UsuarioResponse()
 
 data class UsuarioBasicoResponse(

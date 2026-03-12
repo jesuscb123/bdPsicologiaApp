@@ -2,7 +2,9 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPaciente
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.pacienteDTO.AsignarPsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -48,6 +50,22 @@ class PacienteController(
             ResponseEntity.ok(paciente)
         }else{
             ResponseEntity.notFound().build()
+        }
+    }
+
+    @PatchMapping("/me/psicologo")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun asignarPsicologo(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @RequestBody request: AsignarPsicologoRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val paciente = servicioPaciente.actualizarPsicologo(usuarioFirebase.uid, request.psicologoId)
+            ResponseEntity.ok(paciente)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.badRequest().body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
         }
     }
 }
