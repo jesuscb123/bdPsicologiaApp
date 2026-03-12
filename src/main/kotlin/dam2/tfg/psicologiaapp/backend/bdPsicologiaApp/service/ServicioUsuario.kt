@@ -89,6 +89,31 @@ class ServicioUsuario(
         )
     }
 
+    @Transactional
+    override fun actualizarEmailUsuario(firebaseUid: String, nuevoEmail: String): UsuarioPerfilResponse {
+        val usuario = usuarioRepository.findByFirebaseUid(firebaseUid)
+            ?: throw IllegalStateException("El usuario no existe")
+
+        require(nuevoEmail.isNotBlank()) { "El email no puede estar vacío" }
+
+        if (!EMAIL_REGEX.matches(nuevoEmail)) {
+            throw IllegalArgumentException("El formato del email no es válido")
+        }
+
+        if (usuario.email == nuevoEmail) {
+            return obtenerPerfilUsuario(firebaseUid)
+        }
+
+        if (usuarioRepository.existsByEmail(nuevoEmail)) {
+            throw IllegalStateException("El email ya está en uso")
+        }
+
+        usuario.email = nuevoEmail
+        usuarioRepository.save(usuario)
+
+        return obtenerPerfilUsuario(firebaseUid)
+    }
+
     private fun obtenerOCrearEntidadUsuario(fireBaseUid: String, email: String, request: UsuarioRequest): Usuario {
         val usuarioExistente = usuarioRepository.findByFirebaseUid(fireBaseUid)
 
@@ -100,5 +125,10 @@ class ServicioUsuario(
 
         val nuevoUsuario = UsuarioMapper.toEntity(request, fireBaseUid, email)
         return usuarioRepository.save(nuevoUsuario)
+    }
+
+    companion object {
+        private val EMAIL_REGEX =
+            Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
     }
 }

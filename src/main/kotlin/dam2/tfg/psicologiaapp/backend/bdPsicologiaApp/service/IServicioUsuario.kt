@@ -15,4 +15,6 @@ interface IServicioUsuario {
 
     fun obtenerPerfilUsuario(firebaseUid: String): UsuarioPerfilResponse
 
+    fun actualizarEmailUsuario(firebaseUid: String, nuevoEmail: String): UsuarioPerfilResponse
+
 }

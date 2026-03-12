@@ -13,7 +13,7 @@ data class Usuario(
     val firebaseUid: String,
 
     @Column(name = "email", nullable = false, unique = true)
-    val email: String,
+    var email: String,
 
     @Column (name = "nombreUsuario", nullable = false, unique = true)
      var nombreUsuario: String,

@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarEmailRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
@@ -29,6 +30,25 @@ class UsuarioController(
     ): ResponseEntity<UsuarioPerfilResponse> {
         val perfil = servicioUsuario.obtenerPerfilUsuario(usuarioFirebase.uid)
         return ResponseEntity.ok(perfil)
+    }
+
+    @PatchMapping("/me/email")
+    fun actualizarMiEmail(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @RequestBody request: ActualizarEmailRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val perfilActualizado =
+                servicioUsuario.actualizarEmailUsuario(usuarioFirebase.uid, request.nuevoEmail)
+            ResponseEntity.ok(perfilActualizado)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.CONFLICT).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
+        }
     }
 
     @GetMapping("/{fireBaseUid}")
