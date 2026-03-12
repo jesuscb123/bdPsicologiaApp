@@ -12,4 +12,6 @@ interface IServicioPaciente {
     fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse
 
     fun obtenerEntidadPacientePorFirebaseId(firebaseId: String): Paciente
+
+    fun buscarPacientesPorNombre(nombreUsuario: String): List<PacienteResponse>
 }

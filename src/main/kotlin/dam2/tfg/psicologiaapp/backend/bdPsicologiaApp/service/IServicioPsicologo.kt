@@ -15,4 +15,6 @@ interface IServicioPsicologo {
     fun obtenerPsicologoId(id: Long): PsicologoResponse?
 
     fun obtenerEntidadPsicologo(id: Long): Psicologo
+
+    fun buscarPsicologosPorNombre(nombreUsuario: String): List<PsicologoResponse>
 }

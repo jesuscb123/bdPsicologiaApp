@@ -1,17 +1,19 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.security
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService // Ajusta el import a donde esté
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.FirebaseService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class FirebaseTokenFilter(
-    private val firebaseService: FirebaseService
+    private val firebaseService: FirebaseService,
+    private val servicioRoles: ServicioRoles
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -21,7 +23,6 @@ class FirebaseTokenFilter(
     ) {
         val authHeader = request.getHeader("Authorization")
 
-        // Si no hay token, dejamos que siga (Spring Security bloqueará la ruta después)
         if (authHeader.isNullOrBlank() || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response)
             return
@@ -30,20 +31,20 @@ class FirebaseTokenFilter(
         val token = authHeader.substring(7).trim()
 
         try {
-            // Llamamos a tu servicio existente
             val usuarioFirebase = firebaseService.getUserFromToken(token)
 
             if (usuarioFirebase != null) {
-                // ¡LA MAGIA! Creamos el contexto de seguridad inyectando TU objeto FirebaseUserData
+                val roles = servicioRoles.obtenerRolesPorFirebaseUid(usuarioFirebase.uid)
+                val authorities = roles.map { SimpleGrantedAuthority(it) }
+
                 val authentication = UsernamePasswordAuthenticationToken(
-                    usuarioFirebase, // Principal (El usuario)
-                    null,            // Credentials (No usamos contraseñas aquí)
-                    emptyList()      // Authorities (Roles, por ahora vacío)
+                    usuarioFirebase,
+                    null,
+                    authorities
                 )
                 SecurityContextHolder.getContext().authentication = authentication
             }
         } catch (e: Exception) {
-            // Si el token expiró o es inválido, limpiamos por seguridad
             SecurityContextHolder.clearContext()
         }
 

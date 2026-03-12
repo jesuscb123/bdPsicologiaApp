@@ -51,6 +51,21 @@ class UsuarioController(
         }
     }
 
+    @DeleteMapping("/me")
+    fun eliminarMiUsuario(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<Any> {
+        return try {
+            servicioUsuario.eliminarUsuario(usuarioFirebase.uid)
+            ResponseEntity.noContent().build()
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
+        }
+    }
+
     @GetMapping("/{fireBaseUid}")
     fun obtenerUsuarioByFireBaseId(@PathVariable fireBaseUid: String): ResponseEntity<UsuarioResponse>{
         val usuario = servicioUsuario.obtenerUsuarioByFireBaseId(fireBaseUid)

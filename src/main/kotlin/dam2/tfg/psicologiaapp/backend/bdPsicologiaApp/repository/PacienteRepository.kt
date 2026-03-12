@@ -13,4 +13,8 @@ interface PacienteRepository : JpaRepository<Paciente, Long> {
     fun findByIdFirebaseUsuario(@Param("firebaseUidUsuario") firebaseUidUsuario: String): Paciente?
 
     fun existsByUsuario(usuario: Usuario): Boolean
+
+    fun findAllByPsicologo(psicologo: Psicologo): List<Paciente>
+
+    fun findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario: String): List<Paciente>
 }

@@ -22,12 +22,19 @@ data class Psicologo(
     @OneToMany(mappedBy = "psicologo", fetch = FetchType.LAZY)
     val pacientesAsociados: MutableList<Paciente> = mutableListOf(),
 
-    @OneToMany(mappedBy = "psicologo", fetch = FetchType.LAZY)
+    @OneToMany(
+        mappedBy = "psicologo",
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
     val notas: MutableList<Nota> = mutableListOf(),
 
     @OneToMany(
         mappedBy = "psicologo",
-        fetch = FetchType.LAZY
+        fetch = FetchType.LAZY,
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
     )
     val tareas: MutableList<Tarea> = mutableListOf()
 

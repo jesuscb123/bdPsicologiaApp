@@ -35,6 +35,16 @@ class ServicioPsicologo(
         }
     }
 
+    @Transactional(readOnly = true)
+    override fun buscarPsicologosPorNombre(nombreUsuario: String): List<PsicologoResponse> {
+        if (nombreUsuario.isBlank()) {
+            return emptyList()
+        }
+        val psicologos = psicologoRepository
+            .findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario.trim())
+        return psicologos.map { PsicologoMapper.toResponse(it) }
+    }
+
     @Transactional
     override fun crearPsicologo(usuario: Usuario, psicologoRequest: PsicologoRequest): PsicologoResponse {
 

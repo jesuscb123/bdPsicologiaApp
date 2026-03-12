@@ -10,4 +10,6 @@ interface PsicologoRepository : JpaRepository<Psicologo, Long> {
     @Query("SELECT p FROM Psicologo p WHERE p.usuario.firebaseUid = :firebaseUidUsuario")
     fun findByIdFirebaseUsuario(firebaseUidUsuario: String): Psicologo?
     fun existsByUsuario(usuario: Usuario): Boolean
+
+    fun findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario: String): List<Psicologo>
 }

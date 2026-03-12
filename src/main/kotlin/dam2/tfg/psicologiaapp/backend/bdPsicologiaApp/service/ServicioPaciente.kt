@@ -37,6 +37,18 @@ class ServicioPaciente(
         }
     }
 
+    @Transactional(readOnly = true)
+    override fun buscarPacientesPorNombre(nombreUsuario: String): List<PacienteResponse> {
+        if (nombreUsuario.isBlank()) {
+            return emptyList()
+        }
+
+        val pacientes = pacienteRepository
+            .findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario.trim())
+
+        return pacientes.map { PacienteMapper.toResponse(it) }
+    }
+
     @Transactional
     override fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse {
         if (pacienteRepository.existsByUsuario(usuario)) {

@@ -7,6 +7,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.Psicolo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -20,6 +21,16 @@ class PsicologoController(
     @GetMapping
     fun obtenerPsicologos(): List<PsicologoResponse> {
         return servicioPsicologo.obtenerPsicologos()
+    }
+
+    @GetMapping("/buscar")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun buscarPsicologosPorNombre(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @RequestParam nombreUsuario: String
+    ): ResponseEntity<List<PsicologoResponse>> {
+        val resultados = servicioPsicologo.buscarPsicologosPorNombre(nombreUsuario)
+        return ResponseEntity.ok(resultados)
     }
 
     @GetMapping("/firebaseId/{firebaseId}")

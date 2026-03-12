@@ -114,6 +114,27 @@ class ServicioUsuario(
         return obtenerPerfilUsuario(firebaseUid)
     }
 
+    @Transactional
+    override fun eliminarUsuario(firebaseUid: String) {
+        val usuario = usuarioRepository.findByFirebaseUid(firebaseUid)
+            ?: throw IllegalStateException("El usuario no existe")
+
+        pacienteRepository.findByIdFirebaseUsuario(firebaseUid)?.let { paciente ->
+            pacienteRepository.delete(paciente)
+        }
+
+        psicologoRepository.findByIdFirebaseUsuario(firebaseUid)?.let { psicologo ->
+            val pacientesAsociados = pacienteRepository.findAllByPsicologo(psicologo)
+            if (pacientesAsociados.isNotEmpty()) {
+                pacientesAsociados.forEach { it.psicologo = null }
+                pacienteRepository.saveAll(pacientesAsociados)
+            }
+            psicologoRepository.delete(psicologo)
+        }
+
+        usuarioRepository.delete(usuario)
+    }
+
     private fun obtenerOCrearEntidadUsuario(fireBaseUid: String, email: String, request: UsuarioRequest): Usuario {
         val usuarioExistente = usuarioRepository.findByFirebaseUid(fireBaseUid)
 
