@@ -15,5 +15,7 @@ interface IServicioTarea {
     fun actualizarRealizada(firebaseUidPaciente: String, tareaId: Long, request: TareaActualizarRealizadaRequest): TareaResponse
 
     fun actualizarTarea(firebaseUidPsicologo: String, tareaId: Long, request: TareaActualizarRequest): TareaResponse
+
+    fun eliminarTarea(firebaseUidPsicologo: String, tareaId: Long)
 }
 

@@ -75,4 +75,22 @@ class NotaContoller(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
         }
     }
+
+    @DeleteMapping("/{notaId}")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun eliminarNota(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable notaId: Long
+    ): ResponseEntity<Any> {
+        return try {
+            servicioNota.eliminarNota(usuarioFirebase.uid, notaId)
+            ResponseEntity.noContent().build()
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
+        }
+    }
 }

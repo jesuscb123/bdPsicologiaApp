@@ -78,5 +78,24 @@ class TareaController(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
         }
     }
+
+    // PSICÓLOGO: eliminar una tarea propia
+    @DeleteMapping("/{tareaId}")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun eliminarTarea(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable tareaId: Long
+    ): ResponseEntity<Any> {
+        return try {
+            servicioTarea.eliminarTarea(usuarioFirebase.uid, tareaId)
+            ResponseEntity.noContent().build()
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
+        }
+    }
 }
 

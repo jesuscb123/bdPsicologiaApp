@@ -65,4 +65,16 @@ class ServicioNota(
         val actualizada = notaRepository.save(nota)
         return NotaMapper.toResponse(actualizada)
     }
+
+    @Transactional
+    override fun eliminarNota(firebaseUidPaciente: String, notaId: Long) {
+        val nota = notaRepository.findByIdOrNull(notaId)
+            ?: throw IllegalStateException("La nota no existe")
+
+        if (nota.paciente.usuario.firebaseUid != firebaseUidPaciente) {
+            throw SecurityException("No tienes permiso para eliminar esta nota")
+        }
+
+        notaRepository.delete(nota)
+    }
 }

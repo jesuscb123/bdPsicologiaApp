@@ -88,6 +88,18 @@ class ServicioTarea(
         return TareaMapper.toResponse(actualizada)
     }
 
+    @Transactional
+    override fun eliminarTarea(firebaseUidPsicologo: String, tareaId: Long) {
+        val tarea = tareaRepository.findByIdOrNull(tareaId)
+            ?: throw IllegalStateException("La tarea no existe")
+
+        if (tarea.psicologo.usuario.firebaseUid != firebaseUidPsicologo) {
+            throw SecurityException("No tienes permiso para eliminar esta tarea")
+        }
+
+        tareaRepository.delete(tarea)
+    }
+
     private fun obtenerPsicologoPorFirebaseUid(firebaseUid: String): Psicologo {
         return psicologoRepository.findByIdFirebaseUsuario(firebaseUid)
             ?: throw SecurityException("No autorizado: el usuario no es psicólogo")
