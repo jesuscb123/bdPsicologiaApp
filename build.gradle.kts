@@ -35,6 +35,7 @@ dependencies {
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 
 	// --- LIBRERÍA DE TESTING DE SEGURIDAD (Opcional pero recomendada) ---
 	testImplementation("org.springframework.security:spring-security-test")
