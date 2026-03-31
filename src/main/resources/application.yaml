@@ -15,3 +15,10 @@ spring:
 
 server:
   port: ${PORT:8080}
+
+# Swagger/OpenAPI solo en perfil "dev" (ver application-dev.yaml)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

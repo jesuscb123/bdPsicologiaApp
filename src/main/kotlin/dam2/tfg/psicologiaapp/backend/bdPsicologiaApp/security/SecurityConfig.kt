@@ -25,6 +25,13 @@ class SecurityConfig(
                 // ¡IMPORTANTE! Si tienes rutas públicas, ponlas aquí:
                 // auth.requestMatchers("/api/publico/**").permitAll()
 
+                // Swagger / OpenAPI (solo debería habilitarse en desarrollo)
+                auth.requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**"
+                ).permitAll()
+
                 // Todo lo demás requiere estar autenticado con un token válido
                 auth.anyRequest().authenticated()
             }
