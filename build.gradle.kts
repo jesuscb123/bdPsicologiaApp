@@ -32,6 +32,8 @@ dependencies {
 	// --- LIBRERÍAS DE SEGURIDAD NUEVAS ---
 	implementation("org.springframework.boot:spring-boot-starter-security")
 
+	// DB para desarrollo local (perfil dev) sin Postgres/Docker
+	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

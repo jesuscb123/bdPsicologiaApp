@@ -1,8 +1,9 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,15 +20,15 @@ internal class PsicologoControllerTest {
 
     private lateinit var mockMvc: MockMvc
     private lateinit var servicioPsicologo: IServicioPsicologo
-    private lateinit var servicioUsuario: IServicioUsuario
+    private lateinit var usuarioRepository: UsuarioRepository
 
     private val firebaseUser = FirebaseUserData("uid-paciente", "pac@b.com")
 
     @BeforeEach
     fun setUp() {
         servicioPsicologo = mock()
-        servicioUsuario = mock()
-        val controller = PsicologoController(servicioPsicologo, servicioUsuario)
+        usuarioRepository = mock()
+        val controller = PsicologoController(servicioPsicologo, usuarioRepository)
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(FirebaseUserArgumentResolver())
             .build()
@@ -63,5 +64,53 @@ internal class PsicologoControllerTest {
             .andExpect(status().isOk)
 
         verify(servicioPsicologo).obtenerPsicologos()
+    }
+
+    @Test
+    fun `POST api psicologos me devuelve 201 si usuario existe`() {
+        val usuario = Usuario(
+            id = 1L,
+            firebaseUid = firebaseUser.uid,
+            email = firebaseUser.email,
+            nombreUsuario = "nombre",
+            fotoPerfilUrl = null
+        )
+        whenever(usuarioRepository.findByFirebaseUid(firebaseUser.uid)).thenReturn(usuario)
+        whenever(servicioPsicologo.crearPsicologo(eq(usuario), any())).thenReturn(
+            PsicologoResponse(
+                id = 10L,
+                firebaseUid = firebaseUser.uid,
+                nombreUsuario = "nombre",
+                fotoPerfilUrl = null,
+                numeroColegiado = "1234",
+                especialidad = "clinica"
+            )
+        )
+
+        mockMvc.perform(
+            post("/api/psicologos/me")
+                .with(withPacienteUser())
+                .contentType("application/json")
+                .content("""{"numeroColegiado":"1234","especialidad":"clinica"}""")
+        ).andExpect(status().isCreated)
+
+        verify(usuarioRepository).findByFirebaseUid(firebaseUser.uid)
+        verify(servicioPsicologo).crearPsicologo(eq(usuario), any())
+    }
+
+    @Test
+    fun `POST api psicologos me devuelve 409 si usuario no existe`() {
+        whenever(usuarioRepository.findByFirebaseUid(firebaseUser.uid)).thenReturn(null)
+
+        mockMvc.perform(
+            post("/api/psicologos/me")
+                .with(withPacienteUser())
+                .contentType("application/json")
+                .content("""{"numeroColegiado":"1234","especialidad":"clinica"}""")
+        )
+            .andExpect(status().isConflict)
+
+        verify(usuarioRepository).findByFirebaseUid(firebaseUser.uid)
+        verifyNoInteractions(servicioPsicologo)
     }
 }

@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,8 +13,9 @@ import java.util.Optional
 internal class ServicioPsicologoTest {
 
     private val psicologoRepository: PsicologoRepository = mock()
+    private val pacienteRepository: PacienteRepository = mock()
 
-    private val servicio = ServicioPsicologo(psicologoRepository)
+    private val servicio = ServicioPsicologo(psicologoRepository, pacienteRepository)
 
     @Test
     fun `buscarPsicologosPorNombre devuelve lista vacia cuando nombre en blanco`() {

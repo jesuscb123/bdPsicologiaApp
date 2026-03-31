@@ -1,27 +1,55 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.CrearPsicologoMeRequest
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
-import java.net.URI
 
 @RestController
 @RequestMapping("/api/psicologos")
 class PsicologoController(
     private val servicioPsicologo: IServicioPsicologo,
-    private val servicioUsuario: IServicioUsuario,
+    private val usuarioRepository: UsuarioRepository
 ) : IController {
     @GetMapping
     fun obtenerPsicologos(): List<PsicologoResponse> {
         return servicioPsicologo.obtenerPsicologos()
+    }
+
+    @PostMapping("/me")
+    fun crearPsicologoMe(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @Valid @RequestBody request: CrearPsicologoMeRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val usuario = usuarioRepository.findByFirebaseUid(usuarioFirebase.uid)
+                ?: return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No existe un usuario para este firebaseUid. Crea primero el usuario con POST /api/usuarios.")
+
+            val psicologoRequest = PsicologoRequest(
+                nombreUsuario = usuario.nombreUsuario,
+                fotoPerfilUrl = usuario.fotoPerfilUrl,
+                rol = "PSICOLOGO",
+                numeroColegiado = request.numeroColegiado,
+                especialidad = request.especialidad
+            )
+
+            val creado = servicioPsicologo.crearPsicologo(usuario, psicologoRequest)
+            ResponseEntity.status(HttpStatus.CREATED).body(creado)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.CONFLICT).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
+        }
     }
 
     @GetMapping("/buscar")

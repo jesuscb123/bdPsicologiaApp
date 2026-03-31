@@ -1,9 +1,13 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPaciente
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.pacienteDTO.CrearPacienteMeRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.pacienteDTO.AsignarPsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -13,11 +17,38 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/api/pacientes")
 class PacienteController(
-    private val  servicioPaciente: IServicioPaciente
+    private val servicioPaciente: IServicioPaciente,
+    private val usuarioRepository: UsuarioRepository
 ) : IController{
     @GetMapping
     fun obtenerPacientes(): List<PacienteResponse>{
         return servicioPaciente.obtenerPacientes()
+    }
+
+    @PostMapping("/me")
+    fun crearPacienteMe(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @Valid @RequestBody request: CrearPacienteMeRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val usuario = usuarioRepository.findByFirebaseUid(usuarioFirebase.uid)
+                ?: return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("No existe un usuario para este firebaseUid. Crea primero el usuario con POST /api/usuarios.")
+
+            val pacienteRequest = PacienteRequest(
+                nombreUsuario = usuario.nombreUsuario,
+                fotoPerfilUrl = usuario.fotoPerfilUrl,
+                rol = "PACIENTE",
+                psicologoId = request.psicologoId
+            )
+
+            val creado = servicioPaciente.crearPaciente(usuario, pacienteRequest)
+            ResponseEntity.status(HttpStatus.CREATED).body(creado)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.CONFLICT).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
+        }
     }
 
     @GetMapping("/buscar")
@@ -57,7 +88,7 @@ class PacienteController(
     @PreAuthorize("hasRole('PACIENTE')")
     fun asignarPsicologo(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody request: AsignarPsicologoRequest
+        @Valid @RequestBody request: AsignarPsicologoRequest
     ): ResponseEntity<Any> {
         return try {
             val paciente = servicioPaciente.actualizarPsicologo(usuarioFirebase.uid, request.psicologoId)
