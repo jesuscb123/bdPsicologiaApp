@@ -12,8 +12,9 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacientePerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PacienteMapper
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper.toResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,10 +26,29 @@ class ServicioUsuario(
     private val servicioPsicologo: IServicioPsicologo,
     private val servicioPaciente: IServicioPaciente
     ) : IServicioUsuario {
+
+    /**
+     * Resuelve el response del usuario según roles existentes en BD.
+     * Si coexisten roles, prioriza PSICOLOGO (misma lógica que obtenerPerfilUsuario).
+     */
+    private fun resolverUsuarioResponse(usuario: Usuario): UsuarioResponse {
+        val firebaseUid = usuario.firebaseUid
+
+        psicologoRepository.findByIdFirebaseUsuario(firebaseUid)?.let { psicologo ->
+            return PsicologoMapper.toResponse(psicologo)
+        }
+
+        pacienteRepository.findByIdFirebaseUsuario(firebaseUid)?.let { paciente ->
+            return PacienteMapper.toResponse(paciente)
+        }
+
+        return UsuarioMapper.toResponse(usuario)
+    }
+
     @Transactional
     override fun obtenerUsuarioByFireBaseId(idFirebase: String): UsuarioResponse? {
-        return usuarioRepository.findByFirebaseUid(idFirebase)?.let {
-            UsuarioMapper.toResponse(it)
+        return usuarioRepository.findByFirebaseUid(idFirebase)?.let { usuario ->
+            resolverUsuarioResponse(usuario)
         }
     }
 
@@ -37,7 +57,7 @@ class ServicioUsuario(
         val usuarios = usuarioRepository.findAll()
 
         return usuarios.map { usuario ->
-            UsuarioMapper.toResponse(usuario)
+            resolverUsuarioResponse(usuario)
         }
     }
 

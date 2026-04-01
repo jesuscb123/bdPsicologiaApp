@@ -52,6 +52,16 @@ class PsicologoController(
         }
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun obtenerMiPsicologo(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<PsicologoResponse> {
+        val psicologo = servicioPsicologo.obtenerPsicologoFirebaseId(usuarioFirebase.uid)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(psicologo)
+    }
+
     @GetMapping("/buscar")
     @PreAuthorize("hasRole('PACIENTE')")
     fun buscarPsicologosPorNombre(

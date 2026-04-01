@@ -4,7 +4,6 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -18,6 +17,7 @@ class NotaContoller(
     private val servicioNota: IServicioNota
 ) {
     @GetMapping("/pacientes/{pacienteId}")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     fun obtenerNotasParaPsicologo(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
@@ -32,6 +32,7 @@ class NotaContoller(
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('PACIENTE')")
     fun obtenerMisNotas(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
     ): ResponseEntity<List<NotaResponse>> {
@@ -41,14 +42,15 @@ class NotaContoller(
         return if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
     }
 
-    @PostMapping("/paciente/firebaseId/{firebaseId}")
+    @PostMapping
+    @PreAuthorize("hasRole('PACIENTE')")
     fun crearNota(
-        @PathVariable firebaseId: String,
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @RequestBody request: NotaRequest
     ): ResponseEntity<NotaResponse> {
 
         return try {
-            val notaGuardada = servicioNota.crearNota(firebaseId, request)
+            val notaGuardada = servicioNota.crearNota(usuarioFirebase.uid, request)
 
             ResponseEntity.created(URI.create("/api/notas/${notaGuardada.id}")).body(notaGuardada)
 

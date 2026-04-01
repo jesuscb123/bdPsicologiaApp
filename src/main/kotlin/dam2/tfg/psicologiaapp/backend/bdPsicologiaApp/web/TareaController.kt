@@ -20,6 +20,7 @@ class TareaController(
 ) {
     // PACIENTE: ver mis tareas asignadas
     @GetMapping
+    @PreAuthorize("hasRole('PACIENTE')")
     fun obtenerMisTareas(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
     ): ResponseEntity<List<TareaResponse>> {
@@ -29,6 +30,7 @@ class TareaController(
 
     // PSICÓLOGO: ver tareas que ha asignado a un paciente concreto
     @GetMapping("/pacientes/{pacienteId}")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     fun obtenerTareasPacienteParaPsicologo(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
@@ -39,6 +41,7 @@ class TareaController(
 
     // PSICÓLOGO: asignar una tarea a un paciente
     @PostMapping("/pacientes/{pacienteId}")
+    @PreAuthorize("hasRole('PSICOLOGO')")
     fun crearTarea(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long,
@@ -50,6 +53,7 @@ class TareaController(
 
     // PACIENTE: marcar tarea como realizada/no realizada
     @PatchMapping("/{tareaId}/realizada")
+    @PreAuthorize("hasRole('PACIENTE')")
     fun actualizarRealizada(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable tareaId: Long,

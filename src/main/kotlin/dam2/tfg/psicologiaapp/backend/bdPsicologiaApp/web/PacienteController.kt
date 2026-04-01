@@ -51,6 +51,16 @@ class PacienteController(
         }
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun obtenerMiPaciente(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<PacienteResponse> {
+        val paciente = servicioPaciente.obtenerPacienteFirebaseId(usuarioFirebase.uid)
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(paciente)
+    }
+
     @GetMapping("/buscar")
     @PreAuthorize("hasRole('PSICOLOGO')")
     fun buscarPacientesPorNombre(
@@ -62,7 +72,7 @@ class PacienteController(
     }
 
     @GetMapping("/firebaseId/{firebaseId}")
-    fun obtenerPacienteByFirebaseId(firebaseId: String): ResponseEntity<PacienteResponse>{
+    fun obtenerPacienteByFirebaseId(@PathVariable firebaseId: String): ResponseEntity<PacienteResponse>{
         val paciente = servicioPaciente.obtenerPacienteFirebaseId(firebaseId)
 
        return if (paciente != null){
