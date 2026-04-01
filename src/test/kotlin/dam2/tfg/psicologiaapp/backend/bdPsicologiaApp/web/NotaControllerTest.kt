@@ -27,7 +27,7 @@ internal class NotaControllerTest {
     @BeforeEach
     fun setUp() {
         servicioNota = mock()
-        val controller = NotaContoller(servicioNota)
+        val controller = NotaController(servicioNota)
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
             .setCustomArgumentResolvers(FirebaseUserArgumentResolver())
             .build()

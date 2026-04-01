@@ -13,7 +13,7 @@ import java.net.URI
 
 @RestController
 @RequestMapping("/api/notas")
-class NotaContoller(
+class NotaController(
     private val servicioNota: IServicioNota
 ) {
     @GetMapping("/pacientes/{pacienteId}")
