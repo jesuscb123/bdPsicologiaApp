@@ -79,6 +79,7 @@ internal class PsicologoControllerTest {
         whenever(servicioPsicologo.crearPsicologo(eq(usuario), any())).thenReturn(
             PsicologoResponse(
                 id = 10L,
+                idEntidadPsicologo = 1L,
                 firebaseUid = firebaseUser.uid,
                 nombreUsuario = "nombre",
                 fotoPerfilUrl = null,

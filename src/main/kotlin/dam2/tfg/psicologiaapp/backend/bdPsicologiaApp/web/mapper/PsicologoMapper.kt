@@ -18,6 +18,7 @@ object PsicologoMapper {
     fun toResponse(psicologo: Psicologo): PsicologoResponse {
         return PsicologoResponse(
             id = psicologo.usuario.id ?: throw IllegalStateException("ID nulo"),
+            idEntidadPsicologo = psicologo.id ?: throw IllegalStateException("ID entidad psicólogo nulo"),
             firebaseUid = psicologo.usuario.firebaseUid,
             nombreUsuario = psicologo.usuario.nombreUsuario,
             fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl,

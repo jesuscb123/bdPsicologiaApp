@@ -17,6 +17,8 @@ sealed class UsuarioResponse {
 
 data class PsicologoResponse(
     override val id: Long,
+    /** ID de la entidad Psicólogo (tabla PSICOLOGOS); `id` es el ID de usuario. */
+    val idEntidadPsicologo: Long,
     override val firebaseUid: String,
     override val nombreUsuario: String,
     override val fotoPerfilUrl: String?,

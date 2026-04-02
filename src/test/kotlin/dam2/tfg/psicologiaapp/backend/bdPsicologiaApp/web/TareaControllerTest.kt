@@ -49,7 +49,7 @@ internal class TareaControllerTest {
 
     @Test
     fun `PUT api tareas id actualiza y devuelve 200`() {
-        val psicologoResp = PsicologoResponse(id = 1L, firebaseUid = "uid-psi", nombreUsuario = "psi", fotoPerfilUrl = null, numeroColegiado = "123", especialidad = "Esp")
+        val psicologoResp = PsicologoResponse(id = 1L, idEntidadPsicologo = 1L, firebaseUid = "uid-psi", nombreUsuario = "psi", fotoPerfilUrl = null, numeroColegiado = "123", especialidad = "Esp")
         val pacienteResp = PacienteResponse(id = 1L, firebaseUid = "uid-pac", nombreUsuario = "pac", fotoPerfilUrl = null, psicologoId = null, idPaciente = 1L)
         val tareaResponse = TareaResponse(1L, "Titulo nuevo", "Desc nueva", LocalDateTime.now(), false, psicologoResp, pacienteResp)
         whenever(servicioTarea.actualizarTarea(eq("uid-psi"), eq(1L), any())).thenReturn(tareaResponse)
