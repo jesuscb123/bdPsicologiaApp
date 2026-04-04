@@ -17,6 +17,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.UsuarioMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.net.URI
 
 @Service
 class ServicioUsuario(
@@ -135,6 +136,28 @@ class ServicioUsuario(
     }
 
     @Transactional
+    override fun actualizarFotoPerfilUsuario(firebaseUid: String, fotoPerfilUrl: String): UsuarioPerfilResponse {
+        val usuario = usuarioRepository.findByFirebaseUid(firebaseUid)
+            ?: throw IllegalStateException("El usuario no existe")
+
+        val urlNormalizada = fotoPerfilUrl.trim()
+        require(urlNormalizada.isNotEmpty()) { "La URL de la foto de perfil no puede estar vacía" }
+
+        if (!esUrlFotoPerfilValida(urlNormalizada)) {
+            throw IllegalArgumentException("La URL de la foto de perfil no es válida")
+        }
+
+        if (usuario.fotoPerfilUrl == urlNormalizada) {
+            return obtenerPerfilUsuario(firebaseUid)
+        }
+
+        usuario.fotoPerfilUrl = urlNormalizada
+        usuarioRepository.save(usuario)
+
+        return obtenerPerfilUsuario(firebaseUid)
+    }
+
+    @Transactional
     override fun eliminarUsuario(firebaseUid: String) {
         val usuario = usuarioRepository.findByFirebaseUid(firebaseUid)
             ?: throw IllegalStateException("El usuario no existe")
@@ -171,5 +194,14 @@ class ServicioUsuario(
     companion object {
         private val EMAIL_REGEX =
             Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+
+        private fun esUrlFotoPerfilValida(url: String): Boolean =
+            try {
+                val uri = URI(url)
+                val esquema = uri.scheme?.lowercase()
+                (esquema == "http" || esquema == "https") && !uri.host.isNullOrBlank()
+            } catch (_: Exception) {
+                false
+            }
     }
 }

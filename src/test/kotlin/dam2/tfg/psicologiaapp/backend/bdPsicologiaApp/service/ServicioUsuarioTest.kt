@@ -102,6 +102,39 @@ internal class ServicioUsuarioTest {
     }
 
     @Test
+    fun `actualizarFotoPerfilUsuario lanza cuando el usuario no existe`() {
+        whenever(usuarioRepository.findByFirebaseUid("uid-no")).thenReturn(null)
+
+        assertThrows<IllegalStateException> {
+            servicio.actualizarFotoPerfilUsuario("uid-no", "https://example.com/a.jpg")
+        }
+    }
+
+    @Test
+    fun `actualizarFotoPerfilUsuario lanza cuando la url es invalida`() {
+        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
+
+        assertThrows<IllegalArgumentException> {
+            servicio.actualizarFotoPerfilUsuario("uid1", "no-es-una-url")
+        }
+    }
+
+    @Test
+    fun `actualizarFotoPerfilUsuario persiste y devuelve perfil`() {
+        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
+        whenever(psicologoRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
+        whenever(pacienteRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
+
+        val resultado = servicio.actualizarFotoPerfilUsuario("uid1", "  https://storage.example.com/x.png  ")
+
+        assertEquals("https://storage.example.com/x.png", usuario.fotoPerfilUrl)
+        assertEquals("https://storage.example.com/x.png", resultado.fotoPerfilUrl)
+        verify(usuarioRepository).save(usuario)
+    }
+
+    @Test
     fun `eliminarUsuario lanza cuando el usuario no existe`() {
         whenever(usuarioRepository.findByFirebaseUid("uid-no")).thenReturn(null)
 

@@ -81,6 +81,34 @@ internal class UsuarioControllerTest {
     }
 
     @Test
+    fun `PATCH api usuarios me foto devuelve 200 cuando ok`() {
+        val perfil = UsuarioPerfilBasicoResponse(
+            1L,
+            "uid1",
+            "nombre",
+            "a@b.com",
+            "https://cdn.example.com/foto.jpg"
+        )
+        whenever(
+            servicioUsuario.actualizarFotoPerfilUsuario(
+                eq("uid1"),
+                eq("https://cdn.example.com/foto.jpg")
+            )
+        ).thenReturn(perfil)
+
+        mockMvc.perform(
+            patch("/api/usuarios/me/foto")
+                .with(withFirebaseUser())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"fotoPerfilUrl":"https://cdn.example.com/foto.jpg"}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.fotoPerfilUrl").value("https://cdn.example.com/foto.jpg"))
+
+        verify(servicioUsuario).actualizarFotoPerfilUsuario("uid1", "https://cdn.example.com/foto.jpg")
+    }
+
+    @Test
     fun `DELETE api usuarios me devuelve 204 cuando ok`() {
         doNothing().whenever(servicioUsuario).eliminarUsuario("uid1")
 

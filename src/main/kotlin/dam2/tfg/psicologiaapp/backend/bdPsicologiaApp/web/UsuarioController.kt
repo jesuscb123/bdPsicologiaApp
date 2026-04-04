@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarEmailRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarFotoPerfilRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
@@ -45,6 +46,25 @@ class UsuarioController(
             ResponseEntity.badRequest().body(e.message)
         } catch (e: IllegalStateException) {
             ResponseEntity.status(HttpStatus.CONFLICT).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
+        }
+    }
+
+    @PatchMapping("/me/foto")
+    fun actualizarMiFotoPerfil(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @RequestBody request: ActualizarFotoPerfilRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val perfilActualizado =
+                servicioUsuario.actualizarFotoPerfilUsuario(usuarioFirebase.uid, request.fotoPerfilUrl)
+            ResponseEntity.ok(perfilActualizado)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Error interno del servidor: ${e.message}")
