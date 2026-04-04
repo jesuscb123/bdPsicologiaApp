@@ -12,5 +12,7 @@ FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=build /app/build/libs/bdPsicologiaApp-0.0.1-SNAPSHOT.jar app.jar
 
+# Render inyecta PORT (no tiene por qué ser 8080); Spring lo lee desde application.yaml.
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENV PORT=8080
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
