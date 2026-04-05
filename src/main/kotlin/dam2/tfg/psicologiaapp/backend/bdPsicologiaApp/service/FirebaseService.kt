@@ -2,10 +2,14 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import com.google.firebase.auth.FirebaseAuth
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class FirebaseService {
+
+    private val log = LoggerFactory.getLogger(FirebaseService::class.java)
+
     fun getUserFromToken(idToken: String): FirebaseUserData? {
         val perfilesActivos = (System.getenv("SPRING_PROFILES_ACTIVE") ?: "")
         val cleanToken = idToken.replace("Bearer ", "").trim()
@@ -28,6 +32,13 @@ class FirebaseService {
                 return FirebaseUserData(uid = decodedToken.uid, email = decodedToken.email)
             } catch (e: Exception) {
                 ultimaExcepcion = e
+                log.warn(
+                    "verifyIdToken falló (intento {} de {}): {} — {}",
+                    indice + 1,
+                    VERIFICACION_TOKEN_INTENTOS,
+                    e.javaClass.simpleName,
+                    e.message,
+                )
                 if (indice < VERIFICACION_TOKEN_INTENTOS - 1) {
                     try {
                         Thread.sleep(VERIFICACION_TOKEN_ESPERA_MS)
@@ -39,7 +50,11 @@ class FirebaseService {
                 }
             }
         }
-        ultimaExcepcion?.printStackTrace()
+        log.error(
+            "Token de Firebase no verificado tras {} intentos. Último error: {}",
+            VERIFICACION_TOKEN_INTENTOS,
+            ultimaExcepcion?.message,
+        )
         return null
     }
 

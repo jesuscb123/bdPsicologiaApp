@@ -1,3 +1,7 @@
+# Variables útiles en Render (además de FIREBASE_CREDENTIALS):
+# FIREBASE_PROJECT_ID — opcional; si falta se toma "project_id" del JSON de credenciales.
+# Debe coincidir con el proyecto del cliente (p. ej. aud del JWT = app-psicologia-bb226).
+
 spring:
   application:
     name: bdPsicologiaApp
