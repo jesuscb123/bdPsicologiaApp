@@ -41,3 +41,7 @@ out/
 
 ### Firebase & Secrets ###
 src/main/resources/*.json
+
+.cursorrules
+
+.GEMINI.md
