@@ -55,6 +55,12 @@ class FirebaseTokenFilter(
                     authorities
                 )
                 SecurityContextHolder.getContext().authentication = authentication
+            } else {
+                log.warn(
+                    "Bearer presente pero verifyIdToken no devolvió usuario (método={} uri={})",
+                    request.method,
+                    request.requestURI
+                )
             }
         } catch (e: Exception) {
             log.error("Error inesperado en FirebaseTokenFilter al procesar el token", e)
