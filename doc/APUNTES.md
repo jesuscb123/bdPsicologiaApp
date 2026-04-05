@@ -1,4 +1,54 @@
-# APUNTES (2026-03-31)
+# APUNTES (2026-03-31; actualizado **2026-04-05**)
+
+## 2026-04-05 — Qué pasaba al cambiar la foto de perfil (y por qué parecía un 401)
+
+### Resumen
+
+Tras mover el almacenamiento de la foto de **Firebase Storage** al **propio backend** (`POST /api/usuarios/me/foto` con `multipart`), en producción (Render + PostgreSQL) la app móvil acababa viendo **fallo al obtener notas** y, a veces, respuestas que **parecían 401** sin que el token de Firebase fuera el verdadero problema.
+
+La causa real estaba en **Hibernate** y el mapeo JPA del campo **`foto_perfil`** en la entidad `Usuario`.
+
+### Síntomas
+
+- Tras **cambiar la foto de perfil**, al recargar el home del paciente fallaba la carga de **notas**.
+- En el cliente podía interpretarse como error de **autenticación (401)**.
+- En los **logs del servidor** (Render) aparecía el error real:
+
+  `org.hibernate.HibernateException: Unable to access lob stream`
+
+  con pila que pasaba por:
+
+  - `ServicioNota.obtenerNotasPaciente`
+  - `NotaMapper.toResponse` → `PacienteMapper.toResponse`
+  - acceso a **`Usuario`** (proxy lazy) → `getFirebaseUid()` / lectura de fila de `usuarios`
+  - `ClobJdbcType` / `StringJavaType.wrap`
+
+### Causa técnica
+
+En `Usuario` el campo de URL de foto estaba anotado con **`@Lob`** además de `columnDefinition = "TEXT"`:
+
+- Con **PostgreSQL** y **Hibernate 6**, `@Lob` en un `String` hace que Hibernate trate el valor como **LOB/CLOB** y use un flujo de lectura distinto al de un `VARCHAR`/`TEXT` normal.
+- Al listar notas, el API construye DTOs que **toca relaciones LAZY** (`Nota` → `Paciente` → `Usuario`). Al inicializar el proxy de `Usuario`, Hibernate carga la fila e intenta leer el LOB.
+- En ese escenario (lazy loading + stream del LOB) es frecuente el error **“Unable to access lob stream”**: el cursor/resultado ya no permite leer el stream del LOB como Hibernate espera.
+
+Por eso el fallo **se manifestaba sobre todo en flujos que hidrataban muchas notas con paciente/usuario** (p. ej. `GET /api/notas`), y **no era un fallo del filtro de Firebase** ni del token en sí, aunque el síntoma en el móvil confundiera.
+
+### Solución aplicada
+
+En la entidad **`Usuario`** (`src/main/kotlin/.../bdPsicologiaApp/domain/Usuario.kt`):
+
+- Se **eliminó `@Lob`** sobre `fotoPerfilUrl`.
+- Se mapeó el campo con **`@JdbcTypeCode(SqlTypes.LONGVARCHAR)`** y `@Column(name = "foto_perfil")`, que en PostgreSQL se comporta como **texto largo** sin el mecanismo problemático del CLOB en cargas lazy.
+
+Con esto, al resolver `Usuario` desde notas/pacientes, la lectura de `foto_perfil` deja de pasar por el flujo LOB que rompía.
+
+### Contexto relacionado (misma época del TFG)
+
+- Fotos servidas desde disco + `GET /api/archivos/perfiles/**` (público).
+- URL pública de la foto: origen de la petición en subida (`forward-headers` en Render) y/o `APP_URL_PUBLICA_BASE` / `FIREBASE_PROJECT_ID` según despliegue.
+- En el **cliente Android** también se ajustaron reintentos de token, orden de llamadas y normalización de URLs `localhost`; lo **crítico para el error de notas en servidor** fue el cambio JPA anterior.
+
+---
 
 ## Contexto / objetivo del día
 
