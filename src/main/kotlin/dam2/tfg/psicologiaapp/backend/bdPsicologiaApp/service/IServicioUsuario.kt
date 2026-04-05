@@ -23,6 +23,7 @@ interface IServicioUsuario {
         firebaseUid: String,
         bytes: ByteArray,
         tipoContenido: String?,
+        basePublicaOrigen: String? = null,
     ): UsuarioPerfilResponse
 
     fun eliminarUsuario(firebaseUid: String)

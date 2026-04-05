@@ -1,11 +1,18 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
-    property = "rol"
+    property = "rol",
+    visible = true,
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = PsicologoPerfilResponse::class, name = "PSICOLOGO"),
+    JsonSubTypes.Type(value = PacientePerfilResponse::class, name = "PACIENTE"),
+    JsonSubTypes.Type(value = UsuarioPerfilBasicoResponse::class, name = "SIN_ROL"),
 )
 sealed class UsuarioPerfilResponse {
     abstract val id: Long

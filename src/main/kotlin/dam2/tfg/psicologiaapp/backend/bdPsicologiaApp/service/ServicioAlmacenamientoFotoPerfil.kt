@@ -15,7 +15,11 @@ class ServicioAlmacenamientoFotoPerfil(
     @Value("\${app.fotos-perfil.url-publica-base}") private val urlPublicaBase: String,
 ) {
 
-    fun guardar(bytes: ByteArray, tipoContenido: String?): String {
+    /**
+     * @param basePublica Si no es null ni vacía, sustituye a [urlPublicaBase] para formar la URL devuelta
+     * (p. ej. origen de la petición HTTP detrás de un proxy).
+     */
+    fun guardar(bytes: ByteArray, tipoContenido: String?, basePublica: String? = null): String {
         require(bytes.isNotEmpty()) { "El archivo está vacío" }
         require(bytes.size <= LIMITE_BYTES_IMAGEN_PERFIL) {
             "La imagen supera el tamaño máximo (${LIMITE_BYTES_IMAGEN_PERFIL / (1024 * 1024)} MB)"
@@ -26,7 +30,8 @@ class ServicioAlmacenamientoFotoPerfil(
         Files.createDirectories(directorioAbsoluto)
         val rutaFichero = directorioAbsoluto.resolve(nombreFichero)
         Files.write(rutaFichero, bytes)
-        val base = urlPublicaBase.trimEnd('/')
+        val base = basePublica?.trim()?.trimEnd('/')?.takeIf { it.isNotEmpty() }
+            ?: urlPublicaBase.trimEnd('/')
         return "$base/api/archivos/perfiles/$nombreFichero"
     }
 

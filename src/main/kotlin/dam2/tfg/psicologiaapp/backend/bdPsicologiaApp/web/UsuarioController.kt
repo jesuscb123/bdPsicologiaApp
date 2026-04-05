@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import jakarta.servlet.http.HttpServletRequest
 import java.net.URI
 
 @RestController
@@ -55,6 +56,7 @@ class UsuarioController(
 
     @PostMapping("/me/foto", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun subirMiFotoPerfil(
+        request: HttpServletRequest,
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @RequestPart("archivo") archivo: MultipartFile,
     ): ResponseEntity<Any> {
@@ -62,10 +64,12 @@ class UsuarioController(
             if (archivo.isEmpty) {
                 return ResponseEntity.badRequest().body("El archivo está vacío")
             }
+            val basePublica = OrigenHttpPeticion.basePublica(request)
             val perfilActualizado = servicioUsuario.subirFotoPerfilDesdeArchivo(
                 firebaseUid = usuarioFirebase.uid,
                 bytes = archivo.bytes,
                 tipoContenido = archivo.contentType,
+                basePublicaOrigen = basePublica,
             )
             ResponseEntity.ok(perfilActualizado)
         } catch (e: IllegalArgumentException) {

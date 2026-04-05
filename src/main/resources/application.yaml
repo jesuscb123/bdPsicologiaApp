@@ -22,6 +22,8 @@ spring:
 server:
   port: ${PORT:8080}
   address: 0.0.0.0
+  # Tras proxy (Render, etc.): scheme/host/puerto públicos en HttpServletRequest
+  forward-headers-strategy: framework
 
 # Swagger/OpenAPI solo en perfil "dev" (ver application-dev.yaml)
 springdoc:

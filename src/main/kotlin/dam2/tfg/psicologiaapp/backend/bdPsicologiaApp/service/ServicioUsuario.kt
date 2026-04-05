@@ -163,12 +163,17 @@ class ServicioUsuario(
         firebaseUid: String,
         bytes: ByteArray,
         tipoContenido: String?,
+        basePublicaOrigen: String?,
     ): UsuarioPerfilResponse {
         usuarioRepository.findByFirebaseUid(firebaseUid)
             ?: throw IllegalStateException("El usuario no existe")
         val tipoNormalizado = tipoContenido?.trim()?.takeIf { it.startsWith("image/", ignoreCase = true) }
             ?: throw IllegalArgumentException("El archivo debe ser una imagen (Content-Type image/*)")
-        val urlPublica = servicioAlmacenamientoFotoPerfil.guardar(bytes, tipoNormalizado)
+        val urlPublica = servicioAlmacenamientoFotoPerfil.guardar(
+            bytes,
+            tipoNormalizado,
+            basePublicaOrigen,
+        )
         return actualizarFotoPerfilUsuario(firebaseUid, urlPublica)
     }
 

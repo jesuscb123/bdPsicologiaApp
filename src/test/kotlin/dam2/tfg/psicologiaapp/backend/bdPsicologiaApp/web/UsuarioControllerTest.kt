@@ -5,7 +5,12 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilBasicoResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -96,6 +101,7 @@ internal class UsuarioControllerTest {
                 eq("uid1"),
                 eq(bytes),
                 eq("image/jpeg"),
+                any(),
             )
         ).thenReturn(perfil)
 
@@ -109,7 +115,7 @@ internal class UsuarioControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.fotoPerfilUrl").value("https://api.example.com/api/archivos/perfiles/abc.jpg"))
 
-        verify(servicioUsuario).subirFotoPerfilDesdeArchivo("uid1", bytes, "image/jpeg")
+        verify(servicioUsuario).subirFotoPerfilDesdeArchivo(eq("uid1"), eq(bytes), eq("image/jpeg"), any())
     }
 
     @Test
