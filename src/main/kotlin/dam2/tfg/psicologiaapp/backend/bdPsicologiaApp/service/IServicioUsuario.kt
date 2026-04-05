@@ -19,6 +19,12 @@ interface IServicioUsuario {
 
     fun actualizarFotoPerfilUsuario(firebaseUid: String, fotoPerfilUrl: String): UsuarioPerfilResponse
 
+    fun subirFotoPerfilDesdeArchivo(
+        firebaseUid: String,
+        bytes: ByteArray,
+        tipoContenido: String?,
+    ): UsuarioPerfilResponse
+
     fun eliminarUsuario(firebaseUid: String)
 
 }

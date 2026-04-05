@@ -2,6 +2,11 @@ spring:
   application:
     name: bdPsicologiaApp
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -24,3 +29,10 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+# Fotos de perfil en disco (en PaaS sin volumen persisten solo hasta el redeploy).
+# APP_URL_PUBLICA_BASE: origen público del API (p. ej. https://tu-servicio.onrender.com) sin barra final.
+app:
+  fotos-perfil:
+    directorio: ${APP_FOTOS_PERFIL_DIR:uploads/perfiles}
+    url-publica-base: ${APP_URL_PUBLICA_BASE:http://localhost:8080}

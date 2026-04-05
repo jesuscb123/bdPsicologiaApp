@@ -16,13 +16,15 @@ internal class ServicioUsuarioTest {
     private val pacienteRepository: PacienteRepository = mock()
     private val servicioPsicologo: IServicioPsicologo = mock()
     private val servicioPaciente: IServicioPaciente = mock()
+    private val servicioAlmacenamientoFotoPerfil: ServicioAlmacenamientoFotoPerfil = mock()
 
     private val servicio = ServicioUsuario(
         usuarioRepository,
         psicologoRepository,
         pacienteRepository,
         servicioPsicologo,
-        servicioPaciente
+        servicioPaciente,
+        servicioAlmacenamientoFotoPerfil,
     )
 
     @Test

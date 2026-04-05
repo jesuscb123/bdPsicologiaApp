@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
@@ -81,31 +82,34 @@ internal class UsuarioControllerTest {
     }
 
     @Test
-    fun `PATCH api usuarios me foto devuelve 200 cuando ok`() {
+    fun `POST api usuarios me foto devuelve 200 cuando ok`() {
+        val bytes = byteArrayOf(1, 2, 3)
         val perfil = UsuarioPerfilBasicoResponse(
             1L,
             "uid1",
             "nombre",
             "a@b.com",
-            "https://cdn.example.com/foto.jpg"
+            "https://api.example.com/api/archivos/perfiles/abc.jpg"
         )
         whenever(
-            servicioUsuario.actualizarFotoPerfilUsuario(
+            servicioUsuario.subirFotoPerfilDesdeArchivo(
                 eq("uid1"),
-                eq("https://cdn.example.com/foto.jpg")
+                eq(bytes),
+                eq("image/jpeg"),
             )
         ).thenReturn(perfil)
 
+        val archivo = MockMultipartFile("archivo", "foto.jpg", "image/jpeg", bytes)
+
         mockMvc.perform(
-            patch("/api/usuarios/me/foto")
+            multipart("/api/usuarios/me/foto")
+                .file(archivo)
                 .with(withFirebaseUser())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"fotoPerfilUrl":"https://cdn.example.com/foto.jpg"}""")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.fotoPerfilUrl").value("https://cdn.example.com/foto.jpg"))
+            .andExpect(jsonPath("$.fotoPerfilUrl").value("https://api.example.com/api/archivos/perfiles/abc.jpg"))
 
-        verify(servicioUsuario).actualizarFotoPerfilUsuario("uid1", "https://cdn.example.com/foto.jpg")
+        verify(servicioUsuario).subirFotoPerfilDesdeArchivo("uid1", bytes, "image/jpeg")
     }
 
     @Test

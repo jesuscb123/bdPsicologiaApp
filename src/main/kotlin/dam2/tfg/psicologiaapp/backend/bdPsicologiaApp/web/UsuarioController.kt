@@ -3,14 +3,15 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarEmailRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarFotoPerfilRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.net.URI
 
 @RestController
@@ -52,14 +53,20 @@ class UsuarioController(
         }
     }
 
-    @PatchMapping("/me/foto")
-    fun actualizarMiFotoPerfil(
+    @PostMapping("/me/foto", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun subirMiFotoPerfil(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody request: ActualizarFotoPerfilRequest
+        @RequestPart("archivo") archivo: MultipartFile,
     ): ResponseEntity<Any> {
         return try {
-            val perfilActualizado =
-                servicioUsuario.actualizarFotoPerfilUsuario(usuarioFirebase.uid, request.fotoPerfilUrl)
+            if (archivo.isEmpty) {
+                return ResponseEntity.badRequest().body("El archivo está vacío")
+            }
+            val perfilActualizado = servicioUsuario.subirFotoPerfilDesdeArchivo(
+                firebaseUid = usuarioFirebase.uid,
+                bytes = archivo.bytes,
+                tipoContenido = archivo.contentType,
+            )
             ResponseEntity.ok(perfilActualizado)
         } catch (e: IllegalArgumentException) {
             ResponseEntity.badRequest().body(e.message)

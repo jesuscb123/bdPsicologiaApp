@@ -25,8 +25,9 @@ class ServicioUsuario(
     private val psicologoRepository: PsicologoRepository,
     private val pacienteRepository: PacienteRepository,
     private val servicioPsicologo: IServicioPsicologo,
-    private val servicioPaciente: IServicioPaciente
-    ) : IServicioUsuario {
+    private val servicioPaciente: IServicioPaciente,
+    private val servicioAlmacenamientoFotoPerfil: ServicioAlmacenamientoFotoPerfil,
+) : IServicioUsuario {
 
     /**
      * Resuelve el response del usuario según roles existentes en BD.
@@ -155,6 +156,20 @@ class ServicioUsuario(
         usuarioRepository.save(usuario)
 
         return obtenerPerfilUsuario(firebaseUid)
+    }
+
+    @Transactional
+    override fun subirFotoPerfilDesdeArchivo(
+        firebaseUid: String,
+        bytes: ByteArray,
+        tipoContenido: String?,
+    ): UsuarioPerfilResponse {
+        usuarioRepository.findByFirebaseUid(firebaseUid)
+            ?: throw IllegalStateException("El usuario no existe")
+        val tipoNormalizado = tipoContenido?.trim()?.takeIf { it.startsWith("image/", ignoreCase = true) }
+            ?: throw IllegalArgumentException("El archivo debe ser una imagen (Content-Type image/*)")
+        val urlPublica = servicioAlmacenamientoFotoPerfil.guardar(bytes, tipoNormalizado)
+        return actualizarFotoPerfilUsuario(firebaseUid, urlPublica)
     }
 
     @Transactional
