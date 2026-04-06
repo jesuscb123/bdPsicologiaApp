@@ -24,9 +24,15 @@ class ServicioNota(
 
         val paciente = servicioPaciente.obtenerPacienteId(pacienteId) ?: throw IllegalStateException("El paciente no existe")
 
-        if (paciente.psicologoId != psicologo.id) throw SecurityException("No tienes permiso para acceder a las notas de este paciente.")
+        // PsicologoResponse.id es el usuario; psicologoId del paciente y el repositorio usan el id de entidad PSICOLOGOS.
+        if (paciente.psicologoId != psicologo.idEntidadPsicologo) {
+            throw SecurityException("No tienes permiso para acceder a las notas de este paciente.")
+        }
 
-        val notas = notaRepository.obtenerNotasPacienteParaPsicologo(paciente.id, psicologo.id)
+        val notas = notaRepository.obtenerNotasPacienteParaPsicologo(
+            paciente.idPaciente,
+            psicologo.idEntidadPsicologo,
+        )
 
         return notas.map { NotaMapper.toResponse(it) }
     }
