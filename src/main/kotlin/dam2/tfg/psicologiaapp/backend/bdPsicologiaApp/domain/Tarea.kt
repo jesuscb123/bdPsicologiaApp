@@ -22,6 +22,10 @@ data class Tarea(
     @Column(name = "realizada", nullable = false)
     var realizada: Boolean = false,
 
+    /** El paciente ha aceptado la tarea en la app; obligatorio antes de poder marcarla como completada. */
+    @Column(name = "aceptada_por_paciente", nullable = false)
+    var aceptadaPorPaciente: Boolean = false,
+
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn (name = "psicologo_id", nullable = false)
     var psicologo: Psicologo,

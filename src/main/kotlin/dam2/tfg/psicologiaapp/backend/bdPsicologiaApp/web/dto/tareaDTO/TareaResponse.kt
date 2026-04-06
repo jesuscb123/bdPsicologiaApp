@@ -10,6 +10,7 @@ data class TareaResponse(
     val descripcion: String,
     val horaEnvio: LocalDateTime,
     val realizada: Boolean,
+    val aceptadaPorPaciente: Boolean,
     val psicologo: PsicologoResponse,
     val paciente: PacienteResponse
 )

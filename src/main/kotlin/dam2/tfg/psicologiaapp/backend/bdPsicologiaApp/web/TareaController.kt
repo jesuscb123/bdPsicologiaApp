@@ -59,8 +59,29 @@ class TareaController(
         @PathVariable tareaId: Long,
         @RequestBody request: TareaActualizarRealizadaRequest
     ): ResponseEntity<TareaResponse> {
-        val actualizada = servicioTarea.actualizarRealizada(usuarioFirebase.uid, tareaId, request)
-        return ResponseEntity.ok(actualizada)
+        return try {
+            val actualizada = servicioTarea.actualizarRealizada(usuarioFirebase.uid, tareaId, request)
+            ResponseEntity.ok(actualizada)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.badRequest().build()
+        }
+    }
+
+    // PACIENTE: aceptar la tarea asignada por el psicólogo
+    @PatchMapping("/{tareaId}/aceptada")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun aceptarTarea(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable tareaId: Long
+    ): ResponseEntity<TareaResponse> {
+        return try {
+            val actualizada = servicioTarea.aceptarTareaPaciente(usuarioFirebase.uid, tareaId)
+            ResponseEntity.ok(actualizada)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.notFound().build()
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
     }
 
     // PSICÓLOGO: actualizar título y descripción de una tarea

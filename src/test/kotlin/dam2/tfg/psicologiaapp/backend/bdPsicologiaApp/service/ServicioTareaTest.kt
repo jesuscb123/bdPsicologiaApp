@@ -27,7 +27,7 @@ internal class ServicioTareaTest {
         val usuarioPac = Usuario(2L, "uid-pac", "pac@b.com", "pac", null)
         val psicologo = Psicologo(1L, usuarioPsi, "123", "Esp")
         val paciente = Paciente(1L, usuarioPac, psicologo)
-        return Tarea(1L, "Titulo", "Desc", java.time.LocalDateTime.now(), false, psicologo, paciente)
+        return Tarea(1L, "Titulo", "Desc", java.time.LocalDateTime.now(), false, false, psicologo, paciente)
     }
 
     @Test

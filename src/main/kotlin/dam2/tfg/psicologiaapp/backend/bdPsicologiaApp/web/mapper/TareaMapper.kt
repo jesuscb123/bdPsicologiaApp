@@ -23,6 +23,7 @@ object TareaMapper {
             descripcion = entity.descripcionTarea,
             horaEnvio = entity.horaEnvio,
             realizada = entity.realizada,
+            aceptadaPorPaciente = entity.aceptadaPorPaciente,
             psicologo = PsicologoMapper.toResponse(entity.psicologo),
             paciente = PacienteMapper.toResponse(entity.paciente)
         )

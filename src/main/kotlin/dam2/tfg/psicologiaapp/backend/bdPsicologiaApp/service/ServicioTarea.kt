@@ -64,9 +64,30 @@ class ServicioTarea(
             throw SecurityException("No tienes permiso para actualizar esta tarea")
         }
 
+        if (request.realizada && !tarea.aceptadaPorPaciente) {
+            throw IllegalStateException("Debes aceptar la tarea antes de marcarla como completada")
+        }
+
         tarea.realizada = request.realizada
         val actualizada = tareaRepository.save(tarea)
         return TareaMapper.toResponse(actualizada)
+    }
+
+    @Transactional
+    override fun aceptarTareaPaciente(firebaseUidPaciente: String, tareaId: Long): TareaResponse {
+        val tarea = tareaRepository.findByIdOrNull(tareaId)
+            ?: throw IllegalStateException("La tarea no existe")
+
+        if (tarea.paciente.usuario.firebaseUid != firebaseUidPaciente) {
+            throw SecurityException("No tienes permiso para aceptar esta tarea")
+        }
+
+        if (!tarea.aceptadaPorPaciente) {
+            tarea.aceptadaPorPaciente = true
+            tareaRepository.save(tarea)
+        }
+
+        return TareaMapper.toResponse(tarea)
     }
 
     @Transactional
