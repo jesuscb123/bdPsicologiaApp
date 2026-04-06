@@ -1,4 +1,34 @@
-# APUNTES (2026-03-31; actualizado **2026-04-05**)
+# APUNTES (2026-03-31; actualizado **2026-04-06**)
+
+## 2026-04-06 — Notas del psicólogo: permisos y tareas con aceptación del paciente
+
+### `ServicioNota` — comparación incorrecta de IDs (psicólogo vs paciente)
+
+- **Problema**: `GET /api/notas/pacientes/{pacienteId}` fallaba con `SecurityException` aunque el paciente pertenecía al psicólogo.
+- **Causa**: Se comparaba `paciente.psicologoId` (FK a la entidad `PSICOLOGOS`) con `PsicologoResponse.id`, que en el DTO es el **ID de usuario**, no el de la entidad psicólogo. Además, en el repositorio se pasaba `paciente.id` (usuario) en lugar de `paciente.idPaciente` (PK de `PACIENTES_v2`).
+- **Corrección** (`ServicioNota.obtenerNotasPacienteParaPsicologo`): comparar con `psicologo.idEntidadPsicologo` y consultar notas con `paciente.idPaciente` e `idEntidadPsicologo`.
+
+### Tareas: campo `aceptadaPorPaciente` y flujo paciente
+
+- **Entidad** `Tarea`: columna `aceptada_por_paciente` (boolean, default `false`). Hibernate `ddl-auto: update` la crea en PostgreSQL.
+- **DTO** `TareaResponse`: incluye `aceptadaPorPaciente`.
+- **Endpoint** `PATCH /api/tareas/{tareaId}/aceptada` (rol `PACIENTE`): el paciente acepta la tarea asignada por el psicólogo.
+- **`PATCH /api/tareas/{tareaId}/realizada`**: si se intenta marcar `realizada = true` sin haber aceptado antes, responde **400** (`IllegalStateException`).
+- **Reparación de datos antiguos (opcional, manual en PostgreSQL)**: no se ejecuta al arrancar (evita fallos si la columna aún no existe o el orden de DDL en Render difiere). Si hubo tareas **ya completadas** antes de existir `aceptada_por_paciente`, tras el primer despliegue con la columna creada por Hibernate puedes ejecutar en el SQL de Render (una vez):
+
+  ```sql
+  UPDATE tareas SET aceptada_por_paciente = true
+  WHERE realizada = true AND aceptada_por_paciente = false;
+  ```
+
+  Si la columna no existiera aún, asegúrate de que `spring.jpa.hibernate.ddl-auto=update` (o equivalente) esté activo en el servicio, o crea la columna explícitamente antes del `UPDATE`.
+
+### Tests
+
+- `ServicioTareaTest`: constructor de `Tarea` actualizado con el nuevo `Boolean` entre `realizada` y relaciones.
+- `TareaControllerTest`: `TareaResponse` incluye el nuevo campo.
+
+---
 
 ## 2026-04-05 — Qué pasaba al cambiar la foto de perfil (y por qué parecía un 401)
 
