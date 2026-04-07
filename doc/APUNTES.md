@@ -10,18 +10,28 @@
 
 ### Tareas: campo `aceptadaPorPaciente` y flujo paciente
 
-- **Entidad** `Tarea`: columna `aceptada_por_paciente` (boolean, default `false`). Hibernate `ddl-auto: update` la crea en PostgreSQL.
+- **Entidad** `Tarea`: columna `aceptada_por_paciente` (boolean, default `false`). En local, Hibernate con `ddl-auto: update` puede crearla; en **Render/PostgreSQL**, si la columna no aparece, aplica el esquema **a mano** (ver abajo).
 - **DTO** `TareaResponse`: incluye `aceptadaPorPaciente`.
 - **Endpoint** `PATCH /api/tareas/{tareaId}/aceptada` (rol `PACIENTE`): el paciente acepta la tarea asignada por el psicólogo.
 - **`PATCH /api/tareas/{tareaId}/realizada`**: si se intenta marcar `realizada = true` sin haber aceptado antes, responde **400** (`IllegalStateException`).
-- **Reparación de datos antiguos (opcional, manual en PostgreSQL)**: no se ejecuta al arrancar (evita fallos si la columna aún no existe o el orden de DDL en Render difiere). Si hubo tareas **ya completadas** antes de existir `aceptada_por_paciente`, tras el primer despliegue con la columna creada por Hibernate puedes ejecutar en el SQL de Render (una vez):
 
-  ```sql
-  UPDATE tareas SET aceptada_por_paciente = true
-  WHERE realizada = true AND aceptada_por_paciente = false;
-  ```
+#### Esquema en PostgreSQL (manual en Render)
 
-  Si la columna no existiera aún, asegúrate de que `spring.jpa.hibernate.ddl-auto=update` (o equivalente) esté activo en el servicio, o crea la columna explícitamente antes del `UPDATE`.
+En el **Shell** de la base en Render o en cualquier cliente SQL contra tu Postgres, ejecuta **una vez** (idempotente gracias a `IF NOT EXISTS`):
+
+```sql
+ALTER TABLE tareas
+ADD COLUMN IF NOT EXISTS aceptada_por_paciente BOOLEAN NOT NULL DEFAULT false;
+```
+
+Opcional: alinear filas antiguas que ya estaban `realizada = true` antes de existir el campo:
+
+```sql
+UPDATE tareas SET aceptada_por_paciente = true
+WHERE realizada = true AND aceptada_por_paciente = false;
+```
+
+Comprueba que en el servicio web no tengas `SPRING_JPA_HIBERNATE_DDL_AUTO=validate` (u otro valor) que impida a Hibernate alinear el esquema si además confías en `update`.
 
 ### Tests
 
