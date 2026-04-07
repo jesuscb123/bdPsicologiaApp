@@ -19,6 +19,9 @@ data class Psicologo(
     @Column(name = "especialidad", nullable = false)
     val especialidad: String = "",
 
+    @Column(name = "descripcion", length = 1000)
+    val descripcion: String? = null,
+
     @OneToMany(mappedBy = "psicologo", fetch = FetchType.LAZY)
     val pacientesAsociados: MutableList<Paciente> = mutableListOf(),
 

@@ -44,7 +44,10 @@ class ServicioPaciente(
         }
 
         val pacientes = pacienteRepository
-            .findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario.trim())
+            .findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(
+                nombreUsuario.trim(),
+                nombreUsuario.trim()
+            )
 
         return pacientes.map { PacienteMapper.toResponse(it) }
     }
@@ -52,7 +55,7 @@ class ServicioPaciente(
     @Transactional
     override fun crearPaciente(usuario: Usuario, pacienteRequest: PacienteRequest): PacienteResponse {
         if (pacienteRepository.existsByUsuario(usuario)) {
-            throw IllegalStateException("El usuario ${usuario.nombreUsuario} ya es paciente")
+            throw IllegalStateException("El usuario ${usuario.nombre} ${usuario.apellidos} ya es paciente")
         }
         var psicologoAsociado: Psicologo? = null
 

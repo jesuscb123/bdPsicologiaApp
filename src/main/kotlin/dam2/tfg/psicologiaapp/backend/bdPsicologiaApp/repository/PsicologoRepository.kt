@@ -11,5 +11,8 @@ interface PsicologoRepository : JpaRepository<Psicologo, Long> {
     fun findByIdFirebaseUsuario(firebaseUidUsuario: String): Psicologo?
     fun existsByUsuario(usuario: Usuario): Boolean
 
-    fun findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario: String): List<Psicologo>
+    fun findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(
+        nombre: String,
+        apellidos: String
+    ): List<Psicologo>
 }

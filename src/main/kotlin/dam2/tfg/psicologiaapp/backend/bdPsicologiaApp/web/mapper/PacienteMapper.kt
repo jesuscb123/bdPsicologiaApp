@@ -19,7 +19,8 @@ object PacienteMapper {
         return PacienteResponse(
             id = paciente.usuario.id ?: throw IllegalStateException("ID nulo"),
             firebaseUid = paciente.usuario.firebaseUid,
-            nombreUsuario = paciente.usuario.nombreUsuario,
+            nombre = paciente.usuario.nombre,
+            apellidos = paciente.usuario.apellidos,
             fotoPerfilUrl = paciente.usuario.fotoPerfilUrl,
             psicologoId = paciente.psicologo?.id,
             idPaciente = paciente.id ?: throw IllegalStateException("ID de paciente nulo")

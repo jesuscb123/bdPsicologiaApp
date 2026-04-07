@@ -36,7 +36,8 @@ class PacienteController(
                     .body("No existe un usuario para este firebaseUid. Crea primero el usuario con POST /api/usuarios.")
 
             val pacienteRequest = PacienteRequest(
-                nombreUsuario = usuario.nombreUsuario,
+                nombre = usuario.nombre,
+                apellidos = usuario.apellidos,
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 rol = "PACIENTE",
                 psicologoId = request.psicologoId

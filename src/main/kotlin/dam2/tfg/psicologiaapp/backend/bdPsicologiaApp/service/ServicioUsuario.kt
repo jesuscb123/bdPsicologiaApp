@@ -83,11 +83,13 @@ class ServicioUsuario(
             return PsicologoPerfilResponse(
                 id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
                 firebaseUid = usuario.firebaseUid,
-                nombreUsuario = usuario.nombreUsuario,
+                nombre = usuario.nombre,
+                apellidos = usuario.apellidos,
                 email = usuario.email,
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 numeroColegiado = psicologo.numeroColegiado,
-                especialidad = psicologo.especialidad
+                especialidad = psicologo.especialidad,
+                descripcion = psicologo.descripcion
             )
         }
 
@@ -95,7 +97,8 @@ class ServicioUsuario(
             return PacientePerfilResponse(
                 id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
                 firebaseUid = usuario.firebaseUid,
-                nombreUsuario = usuario.nombreUsuario,
+                nombre = usuario.nombre,
+                apellidos = usuario.apellidos,
                 email = usuario.email,
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 psicologoId = paciente.psicologo?.id
@@ -105,7 +108,8 @@ class ServicioUsuario(
         return UsuarioPerfilBasicoResponse(
             id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
             firebaseUid = usuario.firebaseUid,
-            nombreUsuario = usuario.nombreUsuario,
+            nombre = usuario.nombre,
+            apellidos = usuario.apellidos,
             email = usuario.email,
             fotoPerfilUrl = usuario.fotoPerfilUrl
         )

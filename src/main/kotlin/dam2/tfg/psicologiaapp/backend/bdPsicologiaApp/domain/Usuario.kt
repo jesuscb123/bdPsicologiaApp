@@ -22,8 +22,11 @@ data class Usuario(
     @Column(name = "email", nullable = false, unique = true)
     var email: String,
 
-    @Column (name = "nombreUsuario", nullable = false, unique = true)
-     var nombreUsuario: String,
+    @Column(name = "nombre", nullable = false)
+    var nombre: String,
+
+    @Column(name = "apellidos", nullable = false)
+    var apellidos: String,
 
     /** Sin @Lob: en PostgreSQL + lazy loading provocaba "Unable to access lob stream". */
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)

@@ -23,9 +23,9 @@ internal class ServicioTareaTest {
     private val servicio = ServicioTarea(tareaRepository, psicologoRepository, pacienteRepository)
 
     private fun crearTareaDePsicologo(uidPsicologo: String): Tarea {
-        val usuarioPsi = Usuario(1L, uidPsicologo, "psi@b.com", "psi", null)
-        val usuarioPac = Usuario(2L, "uid-pac", "pac@b.com", "pac", null)
-        val psicologo = Psicologo(1L, usuarioPsi, "123", "Esp")
+        val usuarioPsi = Usuario(1L, uidPsicologo, "psi@b.com", "Psi", "Apellidos", null)
+        val usuarioPac = Usuario(2L, "uid-pac", "pac@b.com", "Pac", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuarioPsi, "123", "Esp", null)
         val paciente = Paciente(1L, usuarioPac, psicologo)
         return Tarea(1L, "Titulo", "Desc", java.time.LocalDateTime.now(), false, false, psicologo, paciente)
     }

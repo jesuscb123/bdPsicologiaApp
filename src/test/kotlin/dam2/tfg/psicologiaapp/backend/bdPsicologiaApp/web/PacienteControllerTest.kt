@@ -88,7 +88,8 @@ internal class PacienteControllerTest {
             id = 10L,
             firebaseUid = firebaseUser.uid,
             email = firebaseUser.email,
-            nombreUsuario = "nombre",
+            nombre = "Nombre",
+            apellidos = "Apellidos",
             fotoPerfilUrl = null
         )
         whenever(usuarioRepository.findByFirebaseUid(firebaseUser.uid)).thenReturn(usuario)
@@ -96,7 +97,8 @@ internal class PacienteControllerTest {
             PacienteResponse(
                 id = 1L,
                 firebaseUid = firebaseUser.uid,
-                nombreUsuario = "nombre",
+                nombre = "Nombre",
+                apellidos = "Apellidos",
                 fotoPerfilUrl = null,
                 psicologoId = 2L,
                 idPaciente = 1L

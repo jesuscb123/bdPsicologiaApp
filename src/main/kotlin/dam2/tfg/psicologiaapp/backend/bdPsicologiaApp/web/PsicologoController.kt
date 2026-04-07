@@ -6,6 +6,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.ActualizarDescripcionPsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.CrearPsicologoMeRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -36,11 +37,13 @@ class PsicologoController(
                     .body("No existe un usuario para este firebaseUid. Crea primero el usuario con POST /api/usuarios.")
 
             val psicologoRequest = PsicologoRequest(
-                nombreUsuario = usuario.nombreUsuario,
+                nombre = usuario.nombre,
+                apellidos = usuario.apellidos,
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 rol = "PSICOLOGO",
                 numeroColegiado = request.numeroColegiado,
-                especialidad = request.especialidad
+                especialidad = request.especialidad,
+                descripcion = null
             )
 
             val creado = servicioPsicologo.crearPsicologo(usuario, psicologoRequest)
@@ -60,6 +63,28 @@ class PsicologoController(
         val psicologo = servicioPsicologo.obtenerPsicologoFirebaseId(usuarioFirebase.uid)
             ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(psicologo)
+    }
+
+    @PatchMapping("/me/descripcion")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun actualizarMiDescripcion(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @Valid @RequestBody request: ActualizarDescripcionPsicologoRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val actualizado = servicioPsicologo.actualizarDescripcion(
+                firebaseUidPsicologo = usuarioFirebase.uid,
+                descripcion = request.descripcion
+            )
+            ResponseEntity.ok(actualizado)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
+        }
     }
 
     @GetMapping("/buscar")

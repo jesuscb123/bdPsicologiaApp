@@ -22,21 +22,22 @@ internal class ServicioPsicologoTest {
         val resultado = servicio.buscarPsicologosPorNombre("")
 
         assertTrue(resultado.isEmpty())
-        verify(psicologoRepository, never()).findByUsuarioNombreUsuarioContainingIgnoreCase(any())
+        verify(psicologoRepository, never()).findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(any(), any())
     }
 
     @Test
     fun `buscarPsicologosPorNombre devuelve lista cuando hay resultados`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "doctor", null)
-        val psicologo = Psicologo(1L, usuario, "123", "Esp")
-        whenever(psicologoRepository.findByUsuarioNombreUsuarioContainingIgnoreCase("doctor"))
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Doctor", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuario, "123", "Esp", null)
+        whenever(psicologoRepository.findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase("doctor", "doctor"))
             .thenReturn(listOf(psicologo))
 
         val resultado = servicio.buscarPsicologosPorNombre("doctor")
 
         assertEquals(1, resultado.size)
         assertEquals(1L, resultado[0].id)
-        assertEquals("doctor", resultado[0].nombreUsuario)
+        assertEquals("Doctor", resultado[0].nombre)
+        assertEquals("Apellidos", resultado[0].apellidos)
     }
 
     @Test

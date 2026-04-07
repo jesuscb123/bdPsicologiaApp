@@ -72,7 +72,8 @@ internal class PsicologoControllerTest {
             id = 1L,
             firebaseUid = firebaseUser.uid,
             email = firebaseUser.email,
-            nombreUsuario = "nombre",
+            nombre = "Nombre",
+            apellidos = "Apellidos",
             fotoPerfilUrl = null
         )
         whenever(usuarioRepository.findByFirebaseUid(firebaseUser.uid)).thenReturn(usuario)
@@ -81,10 +82,12 @@ internal class PsicologoControllerTest {
                 id = 10L,
                 idEntidadPsicologo = 1L,
                 firebaseUid = firebaseUser.uid,
-                nombreUsuario = "nombre",
+                nombre = "Nombre",
+                apellidos = "Apellidos",
                 fotoPerfilUrl = null,
                 numeroColegiado = "1234",
-                especialidad = "clinica"
+                especialidad = "clinica",
+                descripcion = null
             )
         )
 

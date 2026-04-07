@@ -38,7 +38,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `obtenerUsuarioByFireBaseId devuelve response cuando existe el usuario`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "nombreUser", null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
 
         val resultado = servicio.obtenerUsuarioByFireBaseId("uid1")
@@ -46,7 +46,8 @@ internal class ServicioUsuarioTest {
         assertNotNull(resultado)
         assertEquals(1L, resultado!!.id)
         assertEquals("uid1", resultado.firebaseUid)
-        assertEquals("nombreUser", resultado.nombreUsuario)
+        assertEquals("Nombre", resultado.nombre)
+        assertEquals("Apellidos", resultado.apellidos)
     }
 
     @Test
@@ -60,7 +61,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `obtenerPerfilUsuario devuelve perfil basico cuando no es psicologo ni paciente`() {
-        val usuario = Usuario(1L, "uid1", "email@test.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "email@test.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
         whenever(psicologoRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
         whenever(pacienteRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
@@ -84,7 +85,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `actualizarEmailUsuario lanza cuando el email tiene formato invalido`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
 
         assertThrows<IllegalArgumentException> {
@@ -94,7 +95,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `actualizarEmailUsuario lanza cuando el email ya esta en uso`() {
-        val usuario = Usuario(1L, "uid1", "viejo@b.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "viejo@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
         whenever(usuarioRepository.existsByEmail("otro@b.com")).thenReturn(true)
 
@@ -114,7 +115,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `actualizarFotoPerfilUsuario lanza cuando la url es invalida`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
 
         assertThrows<IllegalArgumentException> {
@@ -124,7 +125,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `actualizarFotoPerfilUsuario persiste y devuelve perfil`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
         whenever(psicologoRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
         whenever(pacienteRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
@@ -147,7 +148,7 @@ internal class ServicioUsuarioTest {
 
     @Test
     fun `eliminarUsuario elimina solo usuario cuando no es paciente ni psicologo`() {
-        val usuario = Usuario(1L, "uid1", "a@b.com", "nombre", null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
         whenever(pacienteRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
         whenever(psicologoRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)

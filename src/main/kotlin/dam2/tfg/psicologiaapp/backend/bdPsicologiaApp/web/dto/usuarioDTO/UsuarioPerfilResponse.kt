@@ -17,7 +17,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 sealed class UsuarioPerfilResponse {
     abstract val id: Long
     abstract val firebaseUid: String
-    abstract val nombreUsuario: String
+    abstract val nombre: String
+    abstract val apellidos: String
     abstract val email: String
     abstract val fotoPerfilUrl: String?
     abstract val rol: String
@@ -26,18 +27,21 @@ sealed class UsuarioPerfilResponse {
 data class PsicologoPerfilResponse(
     override val id: Long,
     override val firebaseUid: String,
-    override val nombreUsuario: String,
+    override val nombre: String,
+    override val apellidos: String,
     override val email: String,
     override val fotoPerfilUrl: String?,
     override val rol: String = "PSICOLOGO",
     val numeroColegiado: String,
-    val especialidad: String
+    val especialidad: String,
+    val descripcion: String?
 ) : UsuarioPerfilResponse()
 
 data class PacientePerfilResponse(
     override val id: Long,
     override val firebaseUid: String,
-    override val nombreUsuario: String,
+    override val nombre: String,
+    override val apellidos: String,
     override val email: String,
     override val fotoPerfilUrl: String?,
     override val rol: String = "PACIENTE",
@@ -47,7 +51,8 @@ data class PacientePerfilResponse(
 data class UsuarioPerfilBasicoResponse(
     override val id: Long,
     override val firebaseUid: String,
-    override val nombreUsuario: String,
+    override val nombre: String,
+    override val apellidos: String,
     override val email: String,
     override val fotoPerfilUrl: String?,
     override val rol: String = "SIN_ROL"

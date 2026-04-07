@@ -10,7 +10,8 @@ object UsuarioMapper {
         return Usuario(
             firebaseUid = fireBaseUid,
             email = email,
-            nombreUsuario = request.nombreUsuario,
+            nombre = request.nombre,
+            apellidos = request.apellidos,
             fotoPerfilUrl = request.fotoPerfilUrl
         )
     }
@@ -19,14 +20,16 @@ object UsuarioMapper {
         return UsuarioBasicoResponse(
             id = usuario.id ?: throw IllegalStateException("El usuario no tiene ID"),
             firebaseUid = usuario.firebaseUid,
-            nombreUsuario = usuario.nombreUsuario,
+            nombre = usuario.nombre,
+            apellidos = usuario.apellidos,
             fotoPerfilUrl = usuario.fotoPerfilUrl
         )
     }
 
     fun merge(entity: Usuario, request: UsuarioRequest): Usuario{
         return entity.copy(
-            nombreUsuario = request.nombreUsuario
+            nombre = request.nombre,
+            apellidos = request.apellidos
         )
     }
 

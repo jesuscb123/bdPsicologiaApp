@@ -11,7 +11,8 @@ object PsicologoMapper {
         return Psicologo(
             usuario = usuario,
             numeroColegiado = request.numeroColegiado,
-            especialidad = request.especialidad
+            especialidad = request.especialidad,
+            descripcion = request.descripcion
         )
     }
 
@@ -20,11 +21,13 @@ object PsicologoMapper {
             id = psicologo.usuario.id ?: throw IllegalStateException("ID nulo"),
             idEntidadPsicologo = psicologo.id ?: throw IllegalStateException("ID entidad psicólogo nulo"),
             firebaseUid = psicologo.usuario.firebaseUid,
-            nombreUsuario = psicologo.usuario.nombreUsuario,
+            nombre = psicologo.usuario.nombre,
+            apellidos = psicologo.usuario.apellidos,
             fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl,
 
             numeroColegiado = psicologo.numeroColegiado,
-            especialidad = psicologo.especialidad
+            especialidad = psicologo.especialidad,
+            descripcion = psicologo.descripcion
         )
     }
 

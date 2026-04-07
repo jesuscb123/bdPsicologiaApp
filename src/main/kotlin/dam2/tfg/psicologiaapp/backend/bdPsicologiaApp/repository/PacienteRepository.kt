@@ -16,5 +16,8 @@ interface PacienteRepository : JpaRepository<Paciente, Long> {
 
     fun findAllByPsicologo(psicologo: Psicologo): List<Paciente>
 
-    fun findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario: String): List<Paciente>
+    fun findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(
+        nombre: String,
+        apellidos: String
+    ): List<Paciente>
 }

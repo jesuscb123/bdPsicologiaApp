@@ -16,14 +16,18 @@ import jakarta.validation.constraints.NotBlank
 )
 
 sealed class UsuarioRequest {
-    abstract val nombreUsuario: String
+    abstract val nombre: String
+    abstract val apellidos: String
     abstract val fotoPerfilUrl: String?
     abstract val rol: String
 }
 
 data class PsicologoRequest(
     @field:NotBlank(message = "El nombre no puede estar vacío")
-    override val nombreUsuario: String,
+    override val nombre: String,
+
+    @field:NotBlank(message = "Los apellidos no pueden estar vacíos")
+    override val apellidos: String,
 
     override val fotoPerfilUrl: String?,
 
@@ -34,12 +38,17 @@ data class PsicologoRequest(
     val numeroColegiado: String,
 
     @field:NotBlank(message = "La especialidad es obligatoria")
-    val especialidad: String
+    val especialidad: String,
+
+    val descripcion: String?
 ) : UsuarioRequest()
 
 data class PacienteRequest(
     @field:NotBlank(message = "El nombre no puede estar vacío")
-    override val nombreUsuario: String,
+    override val nombre: String,
+
+    @field:NotBlank(message = "Los apellidos no pueden estar vacíos")
+    override val apellidos: String,
 
     override val fotoPerfilUrl: String?,
 

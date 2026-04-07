@@ -45,7 +45,10 @@ class ServicioPsicologo(
             return emptyList()
         }
         val psicologos = psicologoRepository
-            .findByUsuarioNombreUsuarioContainingIgnoreCase(nombreUsuario.trim())
+            .findByUsuarioNombreContainingIgnoreCaseOrUsuarioApellidosContainingIgnoreCase(
+                nombreUsuario.trim(),
+                nombreUsuario.trim()
+            )
         return psicologos.map { PsicologoMapper.toResponse(it) }
     }
 
@@ -53,12 +56,13 @@ class ServicioPsicologo(
     override fun crearPsicologo(usuario: Usuario, psicologoRequest: PsicologoRequest): PsicologoResponse {
 
         if (psicologoRepository.existsByUsuario(usuario)){
-            throw IllegalStateException("El usuario ${usuario.nombreUsuario} ya es psicólogo")
+            throw IllegalStateException("El usuario ${usuario.nombre} ${usuario.apellidos} ya es psicólogo")
         }else{
             val nuevoPsicologo = Psicologo(
                 usuario = usuario,
                 numeroColegiado = psicologoRequest.numeroColegiado,
-                especialidad = psicologoRequest.especialidad
+                especialidad = psicologoRequest.especialidad,
+                descripcion = psicologoRequest.descripcion
             )
            val psicologo = psicologoRepository.save(nuevoPsicologo)
 
@@ -78,5 +82,21 @@ class ServicioPsicologo(
             ?: return emptyList()
         val pacientes = pacienteRepository.findAllByPsicologo(psicologo)
         return pacientes.map { PacienteMapper.toResponse(it) }
+    }
+
+    @Transactional
+    override fun actualizarDescripcion(firebaseUidPsicologo: String, descripcion: String?): PsicologoResponse {
+        val psicologo = psicologoRepository.findByIdFirebaseUsuario(firebaseUidPsicologo)
+            ?: throw IllegalStateException("No existe psicólogo para este usuario")
+
+        val descripcionNormalizada = descripcion
+            ?.trim()
+            ?.takeIf { it.isNotBlank() }
+
+        val actualizado = psicologoRepository.save(
+            psicologo.copy(descripcion = descripcionNormalizada)
+        )
+
+        return PsicologoMapper.toResponse(actualizado)
     }
 }

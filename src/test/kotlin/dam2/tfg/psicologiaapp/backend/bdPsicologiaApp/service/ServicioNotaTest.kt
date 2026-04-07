@@ -31,8 +31,8 @@ internal class ServicioNotaTest {
 
     @Test
     fun `actualizarNota lanza SecurityException cuando el paciente no es el dueno`() {
-        val usuario = Usuario(1L, "uid-otro", "a@b.com", "otro", null)
-        val psicologo = Psicologo(1L, usuario, "123", "Especialidad")
+        val usuario = Usuario(1L, "uid-otro", "a@b.com", "Otro", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuario, "123", "Especialidad", null)
         val paciente = Paciente(1L, usuario, psicologo)
         val nota = Nota(1L, "Asunto", "Desc", paciente, psicologo)
         whenever(notaRepository.findById(1L)).thenReturn(Optional.of(nota))
@@ -44,8 +44,8 @@ internal class ServicioNotaTest {
 
     @Test
     fun `actualizarNota actualiza y devuelve cuando el paciente es el dueno`() {
-        val usuario = Usuario(1L, "uid-paciente", "a@b.com", "paciente", null)
-        val psicologo = Psicologo(1L, usuario, "123", "Esp")
+        val usuario = Usuario(1L, "uid-paciente", "a@b.com", "Paciente", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuario, "123", "Esp", null)
         val paciente = Paciente(1L, usuario, psicologo)
         val nota = Nota(1L, "Asunto viejo", "Desc vieja", paciente, psicologo)
         whenever(notaRepository.findById(1L)).thenReturn(Optional.of(nota))
@@ -70,8 +70,8 @@ internal class ServicioNotaTest {
 
     @Test
     fun `eliminarNota lanza SecurityException cuando el paciente no es el dueno`() {
-        val usuario = Usuario(1L, "uid-otro", "a@b.com", "otro", null)
-        val psicologo = Psicologo(1L, usuario, "123", "Esp")
+        val usuario = Usuario(1L, "uid-otro", "a@b.com", "Otro", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuario, "123", "Esp", null)
         val paciente = Paciente(1L, usuario, psicologo)
         val nota = Nota(1L, "A", "D", paciente, psicologo)
         whenever(notaRepository.findById(1L)).thenReturn(Optional.of(nota))
@@ -83,8 +83,8 @@ internal class ServicioNotaTest {
 
     @Test
     fun `eliminarNota elimina cuando el paciente es el dueno`() {
-        val usuario = Usuario(1L, "uid-paciente", "a@b.com", "paciente", null)
-        val psicologo = Psicologo(1L, usuario, "123", "Esp")
+        val usuario = Usuario(1L, "uid-paciente", "a@b.com", "Paciente", "Apellidos", null)
+        val psicologo = Psicologo(1L, usuario, "123", "Esp", null)
         val paciente = Paciente(1L, usuario, psicologo)
         val nota = Nota(1L, "A", "D", paciente, psicologo)
         whenever(notaRepository.findById(1L)).thenReturn(Optional.of(nota))

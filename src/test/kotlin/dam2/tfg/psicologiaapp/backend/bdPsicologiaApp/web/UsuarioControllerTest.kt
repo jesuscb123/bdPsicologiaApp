@@ -58,7 +58,7 @@ internal class UsuarioControllerTest {
 
     @Test
     fun `GET api usuarios me devuelve 200 y perfil`() {
-        val perfil = UsuarioPerfilBasicoResponse(1L, "uid1", "nombre", "a@b.com", null)
+        val perfil = UsuarioPerfilBasicoResponse(1L, "uid1", "Nombre", "Apellidos", "a@b.com", null)
         whenever(servicioUsuario.obtenerPerfilUsuario("uid1")).thenReturn(perfil)
 
         mockMvc.perform(get("/api/usuarios/me").with(withFirebaseUser()))
@@ -72,7 +72,7 @@ internal class UsuarioControllerTest {
 
     @Test
     fun `PATCH api usuarios me email devuelve 200 cuando ok`() {
-        val perfil = UsuarioPerfilBasicoResponse(1L, "uid1", "nombre", "nuevo@b.com", null)
+        val perfil = UsuarioPerfilBasicoResponse(1L, "uid1", "Nombre", "Apellidos", "nuevo@b.com", null)
         whenever(servicioUsuario.actualizarEmailUsuario(eq("uid1"), eq("nuevo@b.com"))).thenReturn(perfil)
 
         mockMvc.perform(
@@ -92,7 +92,8 @@ internal class UsuarioControllerTest {
         val perfil = UsuarioPerfilBasicoResponse(
             1L,
             "uid1",
-            "nombre",
+            "Nombre",
+            "Apellidos",
             "a@b.com",
             "https://api.example.com/api/archivos/perfiles/abc.jpg"
         )

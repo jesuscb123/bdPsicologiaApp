@@ -20,4 +20,6 @@ interface IServicioPsicologo {
     fun buscarPsicologosPorNombre(nombreUsuario: String): List<PsicologoResponse>
 
     fun obtenerPacientesPorFirebaseId(firebaseUidPsicologo: String): List<PacienteResponse>
+
+    fun actualizarDescripcion(firebaseUidPsicologo: String, descripcion: String?): PsicologoResponse
 }
