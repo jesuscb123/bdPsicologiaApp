@@ -5,6 +5,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.TareaRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRealizadaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
@@ -49,6 +50,37 @@ class ServicioTarea(
         obtenerPsicologoPorFirebaseUid(firebaseUidPsicologo)
         val tareas = tareaRepository.findTareasByPsicologoFirebaseUidAndPacienteId(firebaseUidPsicologo, pacienteId)
         return tareas.map { TareaMapper.toResponse(it) }
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerEstadoTareasPaciente(firebaseUidPaciente: String): EstadoSyncResponse {
+        val estado = tareaRepository.obtenerEstadoTareasPaciente(firebaseUidPaciente)
+        return EstadoSyncResponse(
+            ultimaModificacion = estado.ultimaModificacion,
+            total = estado.total
+        )
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerEstadoTareasPacienteParaPsicologo(firebaseUidPsicologo: String, pacienteId: Long): EstadoSyncResponse {
+        val psicologo = obtenerPsicologoPorFirebaseUid(firebaseUidPsicologo)
+        val paciente = obtenerPacientePorId(pacienteId)
+
+        val psicologoPacienteId = paciente.psicologo?.id
+            ?: throw IllegalStateException("El paciente no tiene psicólogo asignado")
+        if (psicologoPacienteId != psicologo.id) {
+            throw SecurityException("No tienes permiso para acceder a las tareas de este paciente")
+        }
+
+        val estado = tareaRepository.obtenerEstadoTareasPacienteParaPsicologo(
+            firebaseUidPsicologo = firebaseUidPsicologo,
+            pacienteId = pacienteId
+        )
+
+        return EstadoSyncResponse(
+            ultimaModificacion = estado.ultimaModificacion,
+            total = estado.total
+        )
     }
 
     @Transactional

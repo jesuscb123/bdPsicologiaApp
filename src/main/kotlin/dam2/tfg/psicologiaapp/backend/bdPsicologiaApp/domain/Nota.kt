@@ -1,6 +1,7 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table (name = "NOTAS")
@@ -22,5 +23,18 @@ class Nota(
 
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "psicologo_id", nullable = false)
-    var psicologo: Psicologo
-)
+    var psicologo: Psicologo,
+
+    @Column(name = "ultima_modificacion", nullable = false)
+    var ultimaModificacion: LocalDateTime = LocalDateTime.now(),
+) {
+    @PrePersist
+    fun alCrear() {
+        ultimaModificacion = LocalDateTime.now()
+    }
+
+    @PreUpdate
+    fun alActualizar() {
+        ultimaModificacion = LocalDateTime.now()
+    }
+}

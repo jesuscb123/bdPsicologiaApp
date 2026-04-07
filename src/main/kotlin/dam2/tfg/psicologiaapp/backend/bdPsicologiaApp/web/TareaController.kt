@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioTarea
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRealizadaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
@@ -28,6 +29,15 @@ class TareaController(
         return if (tareas.isNotEmpty()) ResponseEntity.ok(tareas) else ResponseEntity.noContent().build()
     }
 
+    @GetMapping("/estado")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun obtenerEstadoMisTareas(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<EstadoSyncResponse> {
+        val estado = servicioTarea.obtenerEstadoTareasPaciente(usuarioFirebase.uid)
+        return ResponseEntity.ok(estado)
+    }
+
     // PSICÓLOGO: ver tareas que ha asignado a un paciente concreto
     @GetMapping("/pacientes/{pacienteId}")
     @PreAuthorize("hasRole('PSICOLOGO')")
@@ -37,6 +47,22 @@ class TareaController(
     ): ResponseEntity<List<TareaResponse>> {
         val tareas = servicioTarea.obtenerTareasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
         return if (tareas.isNotEmpty()) ResponseEntity.ok(tareas) else ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/pacientes/{pacienteId}/estado")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun obtenerEstadoTareasPacienteParaPsicologo(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable pacienteId: Long
+    ): ResponseEntity<EstadoSyncResponse> {
+        return try {
+            val estado = servicioTarea.obtenerEstadoTareasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+            ResponseEntity.ok(estado)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
     }
 
     // PSICÓLOGO: asignar una tarea a un paciente

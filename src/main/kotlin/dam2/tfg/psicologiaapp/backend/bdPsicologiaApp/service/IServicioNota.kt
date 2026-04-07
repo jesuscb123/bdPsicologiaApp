@@ -1,13 +1,17 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Nota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 
 interface IServicioNota {
     fun obtenerNotasPacienteParaPsicologo(firebaseId: String, pacienteId: Long): List<NotaResponse>
 
     fun obtenerNotasPaciente(firebaseId: String): List<NotaResponse>
+
+    fun obtenerEstadoNotasPaciente(firebaseUidPaciente: String): EstadoSyncResponse
+
+    fun obtenerEstadoNotasPacienteParaPsicologo(firebaseUidPsicologo: String, pacienteId: Long): EstadoSyncResponse
 
     fun crearNota(firebaseId: String, notaRequest: NotaRequest): NotaResponse
 

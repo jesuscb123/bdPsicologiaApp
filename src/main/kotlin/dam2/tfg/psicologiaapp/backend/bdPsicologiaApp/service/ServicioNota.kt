@@ -1,7 +1,7 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Nota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
@@ -40,6 +40,41 @@ class ServicioNota(
         val notas = notaRepository.obtenerNotasByPacienteUsuarioFirebaseId(firebaseId)
 
         return notas.map { NotaMapper.toResponse(it) }
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerEstadoNotasPaciente(firebaseUidPaciente: String): EstadoSyncResponse {
+        val estado = notaRepository.obtenerEstadoNotasPaciente(firebaseUidPaciente)
+        return EstadoSyncResponse(
+            ultimaModificacion = estado.ultimaModificacion,
+            total = estado.total
+        )
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerEstadoNotasPacienteParaPsicologo(
+        firebaseUidPsicologo: String,
+        pacienteId: Long
+    ): EstadoSyncResponse {
+        val psicologo = servicioPsicologo.obtenerPsicologoFirebaseId(firebaseUidPsicologo)
+            ?: throw IllegalStateException("El psicólogo no existe")
+
+        val paciente = servicioPaciente.obtenerPacienteId(pacienteId)
+            ?: throw IllegalStateException("El paciente no existe")
+
+        if (paciente.psicologoId != psicologo.idEntidadPsicologo) {
+            throw SecurityException("No tienes permiso para acceder a las notas de este paciente.")
+        }
+
+        val estado = notaRepository.obtenerEstadoNotasPacienteParaPsicologo(
+            pacienteId = paciente.idPaciente,
+            psicologoId = psicologo.idEntidadPsicologo
+        )
+
+        return EstadoSyncResponse(
+            ultimaModificacion = estado.ultimaModificacion,
+            total = estado.total
+        )
     }
 
     @Transactional

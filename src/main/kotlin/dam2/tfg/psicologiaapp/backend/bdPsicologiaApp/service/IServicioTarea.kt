@@ -1,5 +1,6 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRealizadaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
@@ -11,6 +12,10 @@ interface IServicioTarea {
     fun obtenerTareasPaciente(firebaseUidPaciente: String): List<TareaResponse>
 
     fun obtenerTareasPacienteParaPsicologo(firebaseUidPsicologo: String, pacienteId: Long): List<TareaResponse>
+
+    fun obtenerEstadoTareasPaciente(firebaseUidPaciente: String): EstadoSyncResponse
+
+    fun obtenerEstadoTareasPacienteParaPsicologo(firebaseUidPsicologo: String, pacienteId: Long): EstadoSyncResponse
 
     fun actualizarRealizada(firebaseUidPaciente: String, tareaId: Long, request: TareaActualizarRealizadaRequest): TareaResponse
 

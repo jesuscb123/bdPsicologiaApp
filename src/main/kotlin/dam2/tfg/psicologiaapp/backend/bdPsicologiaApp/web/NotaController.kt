@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import org.springframework.http.HttpStatus
@@ -40,6 +41,31 @@ class NotaController(
         val notas = servicioNota.obtenerNotasPaciente(usuarioFirebase.uid)
 
         return if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/estado")
+    @PreAuthorize("hasRole('PACIENTE')")
+    fun obtenerEstadoMisNotas(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<EstadoSyncResponse> {
+        val estado = servicioNota.obtenerEstadoNotasPaciente(usuarioFirebase.uid)
+        return ResponseEntity.ok(estado)
+    }
+
+    @GetMapping("/pacientes/{pacienteId}/estado")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun obtenerEstadoNotasPacienteParaPsicologo(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable pacienteId: Long
+    ): ResponseEntity<EstadoSyncResponse> {
+        return try {
+            val estado = servicioNota.obtenerEstadoNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+            ResponseEntity.ok(estado)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        }
     }
 
     @PostMapping
