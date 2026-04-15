@@ -46,5 +46,23 @@ interface CitaRepository : JpaRepository<Cita, Long> {
         @Param("inicioHasta") inicioHasta: Instant,
         @Param("estado") estado: EstadoCita = EstadoCita.RESERVADA
     ): List<Cita>
+
+    /**
+     * Citas cuyo inicio cae en [inicioDesde, inicioHasta) (mitad abierta por hora/slot).
+     * Útil cuando la igualdad exacta de [Instant] falla por precisión o capa de persistencia.
+     */
+    @Query(
+        """
+        SELECT c FROM Cita c
+        WHERE c.psicologo.id = :psicologoId
+          AND c.inicio >= :inicioDesde
+          AND c.inicio < :inicioHasta
+        """
+    )
+    fun findByPsicologoIdAndInicioEnRango(
+        @Param("psicologoId") psicologoId: Long,
+        @Param("inicioDesde") inicioDesde: Instant,
+        @Param("inicioHasta") inicioHasta: Instant,
+    ): List<Cita>
 }
 

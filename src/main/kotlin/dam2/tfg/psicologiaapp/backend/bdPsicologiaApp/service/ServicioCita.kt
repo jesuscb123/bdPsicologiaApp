@@ -68,18 +68,58 @@ class ServicioCita(
         validarDiaLaborable(inicioLocal.toLocalDate())
         validarHoraSlot(inicioLocal.toLocalTime())
 
-        val nueva = Cita(
-            psicologo = psicologo,
-            paciente = paciente,
-            inicio = inicioInstant,
-            duracionMinutos = 60,
-            estado = EstadoCita.RESERVADA
-        )
+        val psicologoId = psicologo.id ?: throw IllegalStateException("El psicólogo no tiene ID")
 
-        val guardada = try {
-            citaRepository.save(nueva)
-        } catch (e: DataIntegrityViolationException) {
-            throw IllegalStateException("CONFLICTO_CITA_SLOT")
+        // Mismo instante en BD puede no coincidir bit a bit con el del request (precisión/persistencia).
+        // Buscamos por ventana de slot [inicioLocal normalizado, +1h) en la zona del paciente.
+        val fechaSlot = inicioLocal.toLocalDate()
+        val horaSlot = inicioLocal.toLocalTime().withSecond(0).withNano(0)
+        val inicioSlot = ZonedDateTime.of(fechaSlot, horaSlot, zoneId).toInstant()
+        val finSlot = inicioSlot.plusSeconds(3600L)
+
+        // Restricción unique (psicologo_id, inicio). Si hay fila CANCELADA en ese slot, se reutiliza.
+        val existente = citaRepository
+            .findByPsicologoIdAndInicioEnRango(psicologoId = psicologoId, inicioDesde = inicioSlot, inicioHasta = finSlot)
+            .firstOrNull()
+
+        val guardada = when (existente?.estado) {
+            EstadoCita.RESERVADA -> throw IllegalStateException("CONFLICTO_CITA_SLOT")
+            EstadoCita.CANCELADA -> {
+                existente.paciente = paciente
+                existente.duracionMinutos = 60
+                existente.inicio = inicioSlot
+                existente.estado = EstadoCita.RESERVADA
+                citaRepository.save(existente)
+            }
+            null -> {
+                val nueva = Cita(
+                    psicologo = psicologo,
+                    paciente = paciente,
+                    inicio = inicioSlot,
+                    duracionMinutos = 60,
+                    estado = EstadoCita.RESERVADA
+                )
+                try {
+                    citaRepository.save(nueva)
+                } catch (e: DataIntegrityViolationException) {
+                    val reintento = citaRepository
+                        .findByPsicologoIdAndInicioEnRango(
+                            psicologoId = psicologoId,
+                            inicioDesde = inicioSlot,
+                            inicioHasta = finSlot,
+                        )
+                        .firstOrNull()
+                    if (reintento?.estado == EstadoCita.CANCELADA) {
+                        reintento.paciente = paciente
+                        reintento.duracionMinutos = 60
+                        reintento.inicio = inicioSlot
+                        reintento.estado = EstadoCita.RESERVADA
+                        citaRepository.save(reintento)
+                    } else {
+                        throw IllegalStateException("CONFLICTO_CITA_SLOT")
+                    }
+                }
+            }
         }
 
         return CitaMapper.toResponse(guardada, reloj)
@@ -140,13 +180,15 @@ class ServicioCita(
         }
 
         val horaInt = horaNormalizada.hour
-        if (horaInt !in 9..17) {
+        // Intervalo de atención 09:00–17:00 (último inicio posible 16:00 para una duración de 60 min)
+        if (horaInt !in 9..16) {
             throw IllegalStateException("La hora debe estar entre 09:00 y 17:00")
         }
     }
 
     private fun generarSlotsDia(): List<LocalTime> {
-        return (9..17).map { LocalTime.of(it, 0) }
+        // Slots de inicio por hora (duración 60 min): 09:00, ..., 16:00
+        return (9..16).map { LocalTime.of(it, 0) }
     }
 }
 
