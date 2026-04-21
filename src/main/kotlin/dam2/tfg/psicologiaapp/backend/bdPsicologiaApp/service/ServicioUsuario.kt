@@ -130,7 +130,7 @@ class ServicioUsuario(
             return obtenerPerfilUsuario(firebaseUid)
         }
 
-        if (usuarioRepository.existsByEmail(nuevoEmail)) {
+        if (usuarioRepository.existsByEmailIgnoreCase(nuevoEmail)) {
             throw IllegalStateException("El email ya está en uso")
         }
 
@@ -200,6 +200,13 @@ class ServicioUsuario(
         }
 
         usuarioRepository.delete(usuario)
+    }
+
+    @Transactional(readOnly = true)
+    override fun existeCorreo(email: String): Boolean {
+        val emailNormalizado = email.trim().lowercase()
+        require(emailNormalizado.isNotBlank()) { "El email no puede estar vacío" }
+        return usuarioRepository.existsByEmailIgnoreCase(emailNormalizado)
     }
 
     private fun obtenerOCrearEntidadUsuario(fireBaseUid: String, email: String, request: UsuarioRequest): Usuario {

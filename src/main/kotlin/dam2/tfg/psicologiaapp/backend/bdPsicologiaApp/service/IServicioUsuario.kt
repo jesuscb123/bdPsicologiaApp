@@ -28,4 +28,6 @@ interface IServicioUsuario {
 
     fun eliminarUsuario(firebaseUid: String)
 
+    fun existeCorreo(email: String): Boolean
+
 }

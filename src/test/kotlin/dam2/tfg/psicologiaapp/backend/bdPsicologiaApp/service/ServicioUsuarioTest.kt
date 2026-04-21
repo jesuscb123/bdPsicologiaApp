@@ -51,6 +51,16 @@ internal class ServicioUsuarioTest {
     }
 
     @Test
+    fun `existeCorreo devuelve true cuando el email existe`() {
+        whenever(usuarioRepository.existsByEmailIgnoreCase("existente@test.com")).thenReturn(true)
+
+        val resultado = servicio.existeCorreo("Existente@Test.com")
+
+        assertTrue(resultado)
+        verify(usuarioRepository).existsByEmailIgnoreCase("existente@test.com")
+    }
+
+    @Test
     fun `obtenerPerfilUsuario lanza cuando el usuario no existe`() {
         whenever(usuarioRepository.findByFirebaseUid("uid-no-existe")).thenReturn(null)
 
@@ -97,7 +107,7 @@ internal class ServicioUsuarioTest {
     fun `actualizarEmailUsuario lanza cuando el email ya esta en uso`() {
         val usuario = Usuario(1L, "uid1", "viejo@b.com", "Nombre", "Apellidos", null)
         whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
-        whenever(usuarioRepository.existsByEmail("otro@b.com")).thenReturn(true)
+        whenever(usuarioRepository.existsByEmailIgnoreCase("otro@b.com")).thenReturn(true)
 
         assertThrows<IllegalStateException> {
             servicio.actualizarEmailUsuario("uid1", "otro@b.com")

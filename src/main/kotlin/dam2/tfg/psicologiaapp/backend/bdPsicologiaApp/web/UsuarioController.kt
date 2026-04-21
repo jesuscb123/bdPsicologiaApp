@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ActualizarEmailRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.ExisteCorreoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioResponse
@@ -21,6 +22,16 @@ import java.net.URI
 class UsuarioController(
    private val servicioUsuario: IServicioUsuario,
 ) {
+
+    @GetMapping("/existe-email")
+    fun existeCorreo(@RequestParam email: String): ResponseEntity<Any> {
+        return try {
+            val existe = servicioUsuario.existeCorreo(email)
+            ResponseEntity.ok(ExisteCorreoResponse(existe = existe))
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        }
+    }
 
     @GetMapping
     fun obtenerUsuarios(): List<UsuarioResponse>{

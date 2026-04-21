@@ -8,5 +8,5 @@ interface UsuarioRepository : JpaRepository<Usuario, Long> {
     @Query("SELECT u FROM Usuario u WHERE u.firebaseUid = :idFirebase")
     fun findByFirebaseUid(idFirebase: String) : Usuario?
 
-    fun existsByEmail(email: String): Boolean
+    fun existsByEmailIgnoreCase(email: String): Boolean
 }

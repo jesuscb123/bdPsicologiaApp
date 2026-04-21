@@ -40,6 +40,7 @@ class SecurityConfig(
                 ).permitAll()
 
                 auth.requestMatchers(HttpMethod.GET, "/api/archivos/perfiles/**").permitAll()
+                auth.requestMatchers(HttpMethod.GET, "/api/usuarios/existe-email").permitAll()
 
                 // Todo lo demás requiere estar autenticado con un token válido
                 auth.anyRequest().authenticated()

@@ -46,6 +46,17 @@ internal class UsuarioControllerTest {
     }
 
     @Test
+    fun `GET api usuarios existe-email devuelve 200 y bandera`() {
+        whenever(servicioUsuario.existeCorreo("a@b.com")).thenReturn(true)
+
+        mockMvc.perform(get("/api/usuarios/existe-email").param("email", "a@b.com"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.existe").value(true))
+
+        verify(servicioUsuario).existeCorreo("a@b.com")
+    }
+
+    @Test
     fun `GET api usuarios devuelve 200 y lista`() {
         whenever(servicioUsuario.obtenerUsuarios()).thenReturn(emptyList())
 
