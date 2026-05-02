@@ -1,8 +1,10 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
@@ -10,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 @Service
-class FirebaseService {
+class FirebaseService(@Autowired(required = false) private val firebaseApp: FirebaseApp?) {
 
     private val log = LoggerFactory.getLogger(FirebaseService::class.java)
     private val executor = Executors.newCachedThreadPool()
@@ -30,11 +32,17 @@ class FirebaseService {
             }
         }
 
+        if (firebaseApp == null) {
+            log.error("FirebaseApp no está inicializado (¿falta FIREBASE_CREDENTIALS en las variables de entorno?)")
+            return null
+        }
+
         var ultimaExcepcion: Exception? = null
         repeat(VERIFICACION_TOKEN_INTENTOS) { indice ->
             try {
+                val auth = FirebaseAuth.getInstance(firebaseApp)
                 val future = CompletableFuture.supplyAsync({
-                    val decoded = FirebaseAuth.getInstance().verifyIdToken(cleanToken)
+                    val decoded = auth.verifyIdToken(cleanToken)
                     FirebaseUserData(uid = decoded.uid, email = decoded.email)
                 }, executor)
 
