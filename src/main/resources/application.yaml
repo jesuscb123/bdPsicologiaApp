@@ -6,6 +6,11 @@ spring:
   application:
     name: bdPsicologiaApp
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.EmbeddedDatabaseAutoConfiguration
+      - org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration
+
   servlet:
     multipart:
       max-file-size: 5MB
