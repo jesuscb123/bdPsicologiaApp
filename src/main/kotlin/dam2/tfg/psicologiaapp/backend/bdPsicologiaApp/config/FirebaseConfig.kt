@@ -43,6 +43,10 @@ class FirebaseConfig {
             if (!idProyecto.isNullOrEmpty()) {
                 constructorOpciones.setProjectId(idProyecto)
             }
+            val urlBaseDatos = System.getenv("FIREBASE_DATABASE_URL")?.trim()
+            if (!urlBaseDatos.isNullOrEmpty()) {
+                constructorOpciones.setDatabaseUrl(urlBaseDatos)
+            }
             val options = constructorOpciones.build()
 
             // 4. Inicializa Firebase con estas opciones

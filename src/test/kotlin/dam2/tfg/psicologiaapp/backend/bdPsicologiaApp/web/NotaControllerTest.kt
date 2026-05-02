@@ -5,6 +5,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
+import java.time.LocalDateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
@@ -49,7 +50,7 @@ internal class NotaControllerTest {
     fun `PUT api notas id actualiza y devuelve 200`() {
         val pacienteResp = PacienteResponse(id = 1L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos", fotoPerfilUrl = null, psicologoId = null, idPaciente = 1L)
         val psicologoResp = PsicologoResponse(id = 1L, idEntidadPsicologo = 1L, firebaseUid = "uid-psi", nombre = "Psi", apellidos = "Apellidos", fotoPerfilUrl = null, numeroColegiado = "123", especialidad = "Esp", descripcion = null)
-        val notaResponse = NotaResponse(1L, "Asunto nuevo", "Desc nueva", pacienteResp, psicologoResp)
+        val notaResponse = NotaResponse(1L, "Asunto nuevo", "Desc nueva", LocalDateTime.now(), pacienteResp, psicologoResp)
         whenever(servicioNota.actualizarNota(eq("uid-paciente"), eq(1L), any())).thenReturn(notaResponse)
 
         mockMvc.perform(
