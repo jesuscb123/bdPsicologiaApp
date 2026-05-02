@@ -24,8 +24,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: validate
+    show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
 # Render/Docker: hay que escuchar en todas las interfaces; si no, el health check no ve el puerto.
