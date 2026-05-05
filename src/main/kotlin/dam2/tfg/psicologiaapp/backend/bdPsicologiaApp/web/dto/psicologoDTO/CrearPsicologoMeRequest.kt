@@ -8,8 +8,8 @@ data class CrearPsicologoMeRequest(
     @field:NotBlank(message = "El número de colegiado es obligatorio")
     @field:Size(
         min = 4,
-        max = 32,
-        message = "El número de colegiado debe tener entre 4 y 32 caracteres"
+        max = 15,
+        message = "El número de colegiado debe tener entre 4 y 15 caracteres"
     )
     @field:Pattern(
         regexp = "^[A-Za-z0-9\\-\\.\\s]+$",

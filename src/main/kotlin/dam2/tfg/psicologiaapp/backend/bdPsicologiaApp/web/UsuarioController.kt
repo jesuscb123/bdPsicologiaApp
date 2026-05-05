@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.Valid
 import java.net.URI
 
 @RestController
@@ -121,7 +122,7 @@ class UsuarioController(
     @PostMapping
     fun crearUsuario(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody usuarioRequest: UsuarioRequest
+        @Valid @RequestBody usuarioRequest: UsuarioRequest
     ): ResponseEntity<Any> {
         return try {
             if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
