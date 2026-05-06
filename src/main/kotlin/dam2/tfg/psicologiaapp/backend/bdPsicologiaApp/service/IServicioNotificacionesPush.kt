@@ -1,0 +1,28 @@
+package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
+
+/**
+ * Envoltorio sobre Firebase Cloud Messaging para enviar notificaciones push a los tokens
+ * registrados de un usuario. Centralizar aquí el SDK permite que el resto de servicios
+ * (tareas, chat, futuras citas) sean independientes del proveedor.
+ */
+interface IServicioNotificacionesPush {
+
+    /** Notifica al destinatario sobre un nuevo mensaje de chat. */
+    fun notificarNuevoMensajeChat(
+        firebaseUidDestinatario: String,
+        chatId: String,
+        nombreRemitente: String,
+        vistaPreviaTexto: String,
+        pacienteId: Long,
+        psicologoId: Long,
+    )
+
+    /** Notifica al paciente que su psicólogo le ha asignado una tarea nueva. */
+    fun notificarNuevaTarea(
+        firebaseUidPaciente: String,
+        nombrePsicologo: String,
+        tituloTarea: String,
+        descripcionTarea: String,
+        tareaId: Long,
+    )
+}

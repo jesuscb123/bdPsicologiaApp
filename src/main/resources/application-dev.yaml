@@ -15,6 +15,11 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
 
+  flyway:
+    # H2 en memoria + SQL específico de PostgreSQL: migraciones desactivadas;
+    # Hibernate crea el esquema con ddl-auto=update.
+    enabled: false
+
   sql:
     init:
       mode: never

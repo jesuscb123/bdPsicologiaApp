@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit
 @Service
 class ServicioChat(
     private val pacienteRepository: PacienteRepository,
-    private val psicologoRepository: PsicologoRepository
+    private val psicologoRepository: PsicologoRepository,
+    private val servicioNotificacionesPush: IServicioNotificacionesPush,
 ) : IServicioChat {
 
     private val log = LoggerFactory.getLogger(ServicioChat::class.java)
@@ -76,6 +77,64 @@ class ServicioChat(
             interlocutorFotoPerfilUrl = fotoInterlocutor,
             rtdbRuta = "chats/$chatId"
         )
+    }
+
+    @Transactional(readOnly = true)
+    override fun notificarMensajeChat(
+        firebaseUidRemitente: String,
+        chatId: String,
+        vistaPreviaTexto: String,
+    ) {
+        if (chatId.isBlank()) throw IllegalArgumentException("chatId vacío")
+
+        val (pacienteId, psicologoId) = parsearChatId(chatId)
+            ?: throw IllegalArgumentException("Formato de chatId inválido: $chatId")
+
+        val paciente = pacienteRepository.findByIdOrNull(pacienteId)
+            ?: throw IllegalStateException("Paciente $pacienteId no encontrado")
+        val psicologoDelPaciente = paciente.psicologo
+            ?: throw IllegalStateException("El paciente no tiene psicólogo asignado")
+
+        if (psicologoDelPaciente.id != psicologoId) {
+            throw SecurityException("La asignación paciente-psicólogo no coincide con el chat")
+        }
+
+        val uidPaciente = paciente.usuario.firebaseUid
+        val uidPsicologo = psicologoDelPaciente.usuario.firebaseUid
+
+        val (uidDestinatario, nombreRemitente) = when (firebaseUidRemitente) {
+            uidPaciente -> uidPsicologo to nombreCompleto(paciente.usuario.nombre, paciente.usuario.apellidos)
+            uidPsicologo -> uidPaciente to nombreCompleto(psicologoDelPaciente.usuario.nombre, psicologoDelPaciente.usuario.apellidos)
+            else -> throw SecurityException("El usuario autenticado no participa en el chat $chatId")
+        }
+
+        val previewTruncada = vistaPreviaTexto.trim().take(140)
+        try {
+            servicioNotificacionesPush.notificarNuevoMensajeChat(
+                firebaseUidDestinatario = uidDestinatario,
+                chatId = chatId,
+                nombreRemitente = nombreRemitente,
+                vistaPreviaTexto = previewTruncada,
+                pacienteId = pacienteId,
+                psicologoId = psicologoId,
+            )
+        } catch (e: Exception) {
+            log.warn("Fallo enviando push de chat {}: {}", chatId, e.message)
+        }
+    }
+
+    private fun parsearChatId(chatId: String): Pair<Long, Long>? {
+        // El formato es "paciente_{pacienteId}_psicologo_{psicologoId}".
+        val regex = Regex("^paciente_(\\d+)_psicologo_(\\d+)$")
+        val match = regex.matchEntire(chatId) ?: return null
+        val pacienteId = match.groupValues[1].toLongOrNull() ?: return null
+        val psicologoId = match.groupValues[2].toLongOrNull() ?: return null
+        return pacienteId to psicologoId
+    }
+
+    private fun nombreCompleto(nombre: String?, apellidos: String?): String {
+        val partes = listOfNotNull(nombre?.takeIf { it.isNotBlank() }, apellidos?.takeIf { it.isNotBlank() })
+        return partes.joinToString(" ").ifBlank { "Mensaje nuevo" }
     }
 
     private fun generarChatId(pacienteId: Long, psicologoId: Long): String =

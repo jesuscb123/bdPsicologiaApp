@@ -28,6 +28,11 @@ spring:
     show-sql: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
 # Render/Docker: hay que escuchar en todas las interfaces; si no, el health check no ve el puerto.
 server:
   port: ${PORT:8080}

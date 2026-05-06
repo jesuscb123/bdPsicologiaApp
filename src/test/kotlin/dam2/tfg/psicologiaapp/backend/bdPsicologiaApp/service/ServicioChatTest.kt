@@ -15,8 +15,13 @@ internal class ServicioChatTest {
 
     private val pacienteRepository: PacienteRepository = mock()
     private val psicologoRepository: PsicologoRepository = mock()
+    private val servicioNotificacionesPush: IServicioNotificacionesPush = mock()
 
-    private val servicio = ServicioChat(pacienteRepository, psicologoRepository)
+    private val servicio = ServicioChat(
+        pacienteRepository,
+        psicologoRepository,
+        servicioNotificacionesPush,
+    )
 
     private fun usuarioPsicologo() =
         Usuario(1L, "uid-psi", "psi@test.com", "Psico", "Logo", null)

@@ -11,16 +11,22 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActu
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.TareaMapper
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Service
 class ServicioTarea(
     private val tareaRepository: TareaRepository,
     private val psicologoRepository: PsicologoRepository,
-    private val pacienteRepository: PacienteRepository
+    private val pacienteRepository: PacienteRepository,
+    private val servicioNotificacionesPush: IServicioNotificacionesPush,
 ) : IServicioTarea {
+
+    private val log = LoggerFactory.getLogger(ServicioTarea::class.java)
 
     @Transactional
     override fun crearTarea(firebaseUidPsicologo: String, pacienteId: Long, request: TareaCrearRequest): TareaResponse {
@@ -35,7 +41,48 @@ class ServicioTarea(
 
         val nuevaTarea = TareaMapper.toEntity(request, psicologo, paciente)
         val guardada = tareaRepository.save(nuevaTarea)
+        notificarTareaCreadaTrasCommit(guardada)
         return TareaMapper.toResponse(guardada)
+    }
+
+    /**
+     * Programa el envío del push para cuando la transacción haga commit con éxito.
+     * Si lanzáramos el push dentro del @Transactional y luego rollback, mandaríamos a
+     * un paciente una tarea que en realidad no quedó persistida.
+     */
+    private fun notificarTareaCreadaTrasCommit(tarea: dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Tarea) {
+        val tareaId = tarea.id ?: return
+        val firebaseUidPaciente = tarea.paciente.usuario.firebaseUid
+        val nombrePsicologo = listOf(
+            tarea.psicologo.usuario.nombre,
+            tarea.psicologo.usuario.apellidos,
+        ).filter { it.isNotBlank() }.joinToString(" ")
+        val titulo = tarea.tituloTarea
+        val descripcion = tarea.descripcionTarea
+
+        val ejecutarEnvio = {
+            try {
+                servicioNotificacionesPush.notificarNuevaTarea(
+                    firebaseUidPaciente = firebaseUidPaciente,
+                    nombrePsicologo = nombrePsicologo,
+                    tituloTarea = titulo,
+                    descripcionTarea = descripcion,
+                    tareaId = tareaId,
+                )
+            } catch (e: Exception) {
+                log.warn("No se pudo enviar push de nueva tarea {}: {}", tareaId, e.message)
+            }
+        }
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+                override fun afterCommit() {
+                    ejecutarEnvio()
+                }
+            })
+        } else {
+            ejecutarEnvio()
+        }
     }
 
     @Transactional(readOnly = true)

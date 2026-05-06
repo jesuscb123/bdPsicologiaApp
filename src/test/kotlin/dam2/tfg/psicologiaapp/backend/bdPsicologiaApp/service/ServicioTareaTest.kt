@@ -19,8 +19,14 @@ internal class ServicioTareaTest {
     private val tareaRepository: TareaRepository = mock()
     private val psicologoRepository: PsicologoRepository = mock()
     private val pacienteRepository: PacienteRepository = mock()
+    private val servicioNotificacionesPush: IServicioNotificacionesPush = mock()
 
-    private val servicio = ServicioTarea(tareaRepository, psicologoRepository, pacienteRepository)
+    private val servicio = ServicioTarea(
+        tareaRepository,
+        psicologoRepository,
+        pacienteRepository,
+        servicioNotificacionesPush,
+    )
 
     private fun crearTareaDePsicologo(uidPsicologo: String): Tarea {
         val usuarioPsi = Usuario(1L, uidPsicologo, "psi@b.com", "Psi", "Apellidos", null)
