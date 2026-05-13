@@ -5,6 +5,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Paciente
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.deteccionRiesgo.IServicioDeteccionRiesgo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -17,8 +18,14 @@ internal class ServicioNotaTest {
     private val notaRepository: NotaRepository = mock()
     private val servicioPaciente: IServicioPaciente = mock()
     private val servicioPsicologo: IServicioPsicologo = mock()
+    private val servicioDeteccionRiesgo: IServicioDeteccionRiesgo = mock()
 
-    private val servicio = ServicioNota(notaRepository, servicioPaciente, servicioPsicologo)
+    private val servicio = ServicioNota(
+        notaRepository,
+        servicioPaciente,
+        servicioPsicologo,
+        servicioDeteccionRiesgo,
+    )
 
     @Test
     fun `actualizarNota lanza cuando la nota no existe`() {

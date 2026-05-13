@@ -23,7 +23,7 @@ import java.time.Duration
  * del backend; en su lugar el servicio que use este bean devolverá 503 en tiempo de petición.
  */
 @Configuration
-@EnableConfigurationProperties(GroqProperties::class)
+@EnableConfigurationProperties(GroqProperties::class, RiesgoIaProperties::class)
 class GroqConfig(
     private val propiedades: GroqProperties,
 ) {

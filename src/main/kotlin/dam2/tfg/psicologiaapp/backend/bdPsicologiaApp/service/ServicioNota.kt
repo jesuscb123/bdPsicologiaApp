@@ -1,13 +1,17 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.deteccionRiesgo.IServicioDeteccionRiesgo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.lang.IllegalStateException
 
 @Service
@@ -15,7 +19,10 @@ class ServicioNota(
     val notaRepository: NotaRepository,
     val servicioPaciente: IServicioPaciente,
     val servicioPsicologo: IServicioPsicologo,
+    val servicioDeteccionRiesgo: IServicioDeteccionRiesgo,
 ) : IServicioNota {
+
+    private val log = LoggerFactory.getLogger(ServicioNota::class.java)
 
 
     @Transactional(readOnly = true)
@@ -89,6 +96,10 @@ class ServicioNota(
 
         val notaGuardada = notaRepository.save(nuevaNota)
 
+        // Disparamos la detección de riesgo tras el commit. El propio servicio es @Async, así
+        // que aunque registremos el callback aquí, el paciente recibe respuesta inmediata.
+        paciente.id?.let { lanzarDeteccionRiesgoTrasCommit(it) }
+
         return NotaMapper.toResponse(notaGuardada)
     }
 
@@ -104,7 +115,39 @@ class ServicioNota(
         nota.asunto = request.asunto
         nota.descripcion = request.descripcion
         val actualizada = notaRepository.save(nota)
+
+        // Misma lógica que crear: el contenido cambió, conviene re-evaluar el conjunto.
+        nota.paciente.id?.let { lanzarDeteccionRiesgoTrasCommit(it) }
+
         return NotaMapper.toResponse(actualizada)
+    }
+
+    /**
+     * Registra un callback que, después de hacer commit con éxito, invoca la detección asíncrona
+     * de riesgo. Si lanzáramos la detección dentro de la propia tx y luego hubiera rollback,
+     * estaríamos alertando al psicólogo de una nota que en realidad no se persistió.
+     *
+     * Si no hay sincronización transaccional activa (caso atípico), invocamos directamente: como
+     * el método es `@Async` se desacopla del hilo actual de todos modos.
+     */
+    private fun lanzarDeteccionRiesgoTrasCommit(pacienteId: Long) {
+        val ejecutar = {
+            try {
+                servicioDeteccionRiesgo.evaluarRiesgoUltimasNotasAsync(pacienteId)
+            } catch (e: Exception) {
+                log.warn("No se pudo lanzar la detección de riesgo para paciente {}: {}", pacienteId, e.message)
+            }
+        }
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+                override fun afterCommit() {
+                    ejecutar()
+                }
+            })
+        } else {
+            ejecutar()
+        }
     }
 
     @Transactional

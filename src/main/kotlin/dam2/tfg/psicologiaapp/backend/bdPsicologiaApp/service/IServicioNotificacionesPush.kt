@@ -25,4 +25,15 @@ interface IServicioNotificacionesPush {
         descripcionTarea: String,
         tareaId: Long,
     )
+
+    /**
+     * Notifica al psicólogo de que las últimas notas de un paciente presentan posibles indicios
+     * de riesgo. El payload NO incluye contenido de las notas: solo el id y el nombre del
+     * paciente, suficiente para abrir su ficha desde la notificación.
+     */
+    fun notificarAlertaRiesgo(
+        firebaseUidPsicologo: String,
+        pacienteId: Long,
+        nombrePaciente: String,
+    )
 }

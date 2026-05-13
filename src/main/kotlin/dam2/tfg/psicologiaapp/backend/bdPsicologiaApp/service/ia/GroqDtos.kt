@@ -17,6 +17,16 @@ data class GroqChatMessage(
     val content: String,
 )
 
+/**
+ * Pide a Groq que la respuesta sea JSON estricto. Soporta el formato OpenAI
+ * `{ "type": "json_object" }`. Solo se usa en los flujos que parsean la respuesta como JSON
+ * (p. ej. detección de riesgo); en el resumen IA libre se omite.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class GroqResponseFormat(
+    val type: String,
+)
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class GroqChatRequest(
     val model: String,
@@ -24,6 +34,7 @@ data class GroqChatRequest(
     @JsonProperty("max_tokens") val maxTokens: Int? = null,
     val temperature: Double? = null,
     val stream: Boolean = false,
+    @JsonProperty("response_format") val responseFormat: GroqResponseFormat? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -76,6 +76,33 @@ class ServicioNotificacionesPush(
         )
     }
 
+    override fun notificarAlertaRiesgo(
+        firebaseUidPsicologo: String,
+        pacienteId: Long,
+        nombrePaciente: String,
+    ) {
+        val nombreVisible = nombrePaciente.trim().ifBlank { "un paciente" }
+        // El cuerpo es deliberadamente genérico: NUNCA incluimos contenido de las notas en el
+        // payload FCM (que pasa por servidores de Google). El psicólogo abre la ficha para ver
+        // qué ha detonado el aviso.
+        val titulo = "Atención: revisa las notas de $nombreVisible"
+        val cuerpo = "Se han detectado posibles indicios de riesgo en sus últimas notas. Revisa la ficha cuanto antes."
+        val datos = mapOf(
+            CLAVE_TIPO to TIPO_RIESGO,
+            CLAVE_PACIENTE_ID to pacienteId.toString(),
+            CLAVE_NOMBRE_PACIENTE to nombreVisible,
+        )
+        enviarATokensDeUsuario(
+            firebaseUidDestinatario = firebaseUidPsicologo,
+            titulo = titulo,
+            cuerpo = cuerpo,
+            canal = CANAL_ALERTAS_RIESGO,
+            datos = datos,
+            // Mismo tag => notificaciones sucesivas se reemplazan en lugar de apilarse.
+            tag = "riesgo-$pacienteId",
+        )
+    }
+
     private fun enviarATokensDeUsuario(
         firebaseUidDestinatario: String,
         titulo: String,
@@ -144,14 +171,17 @@ class ServicioNotificacionesPush(
     private companion object {
         const val CANAL_CHAT = "chat"
         const val CANAL_TAREAS = "tareas"
+        const val CANAL_ALERTAS_RIESGO = "alertas_riesgo"
 
         const val CLAVE_TIPO = "tipo"
         const val CLAVE_CHAT_ID = "chatId"
         const val CLAVE_PACIENTE_ID = "pacienteId"
         const val CLAVE_PSICOLOGO_ID = "psicologoId"
         const val CLAVE_TAREA_ID = "tareaId"
+        const val CLAVE_NOMBRE_PACIENTE = "nombrePaciente"
 
         const val TIPO_CHAT = "CHAT"
         const val TIPO_TAREA = "TAREA"
+        const val TIPO_RIESGO = "RIESGO"
     }
 }

@@ -54,9 +54,10 @@ app:
     directorio: ${APP_FOTOS_PERFIL_DIR:uploads/perfiles}
     url-publica-base: ${APP_URL_PUBLICA_BASE:http://localhost:8080}
 
-# Integración con Groq para resumen IA de notas de paciente.
-# GROQ_API_KEY es OBLIGATORIO en producción; si está vacío, el endpoint /resumen-ia responde 503.
-# La API key NUNCA debe llegar al cliente Android — vive solo aquí en el backend.
+# Integración con Groq para resumen IA de notas de paciente y detección de riesgo.
+# GROQ_API_KEY es OBLIGATORIO en producción; si está vacío, el endpoint /resumen-ia responde 503
+# y la detección automática de riesgo queda deshabilitada silenciosamente (no rompe la creación
+# de notas). La API key NUNCA debe llegar al cliente Android — vive solo aquí en el backend.
 ia:
   groq:
     api-key: ${GROQ_API_KEY:}
@@ -65,3 +66,11 @@ ia:
     timeout-segundos: 25
     max-tokens: 600
     temperatura: 0.3
+  # Detección automática de indicios de riesgo cuando el paciente crea/edita una nota.
+  # Se ejecuta de forma asíncrona; nunca bloquea la respuesta HTTP al paciente.
+  # El paciente NO ve ningún resultado; solo el psicólogo recibe un push si nivel = ALTO.
+  riesgo:
+    habilitado: ${IA_RIESGO_HABILITADO:true}
+    ventana-dedupe-horas: ${IA_RIESGO_VENTANA_DEDUPE_HORAS:6}
+    max-tokens: 300
+    temperatura: 0.1
