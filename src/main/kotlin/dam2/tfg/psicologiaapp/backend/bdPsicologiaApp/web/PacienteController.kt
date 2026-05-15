@@ -20,9 +20,19 @@ class PacienteController(
     private val servicioPaciente: IServicioPaciente,
     private val usuarioRepository: UsuarioRepository
 ) : IController{
+    /**
+     * Listado de pacientes. Restringido a psicólogos y filtrado al psicólogo autenticado:
+     * cada psicólogo sólo ve sus propios pacientes (los que tienen `paciente.psicologo_id`
+     * apuntando a su entidad). Antes de esta restricción el endpoint era un IDOR que
+     * permitía a cualquier usuario autenticado listar todos los pacientes.
+     */
     @GetMapping
-    fun obtenerPacientes(): List<PacienteResponse>{
-        return servicioPaciente.obtenerPacientes()
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun obtenerPacientes(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
+    ): ResponseEntity<List<PacienteResponse>> {
+        val pacientes = servicioPaciente.obtenerPacientesAsignadosA(usuarioFirebase.uid)
+        return ResponseEntity.ok(pacientes)
     }
 
     @PostMapping("/me")
@@ -72,25 +82,48 @@ class PacienteController(
         return ResponseEntity.ok(resultados)
     }
 
+    /**
+     * Lectura por firebaseUid del usuario paciente. Sólo se permite cuando el llamante
+     * coincide con el paciente o cuando es el psicólogo asignado a ese paciente.
+     */
     @GetMapping("/firebaseId/{firebaseId}")
-    fun obtenerPacienteByFirebaseId(@PathVariable firebaseId: String): ResponseEntity<PacienteResponse>{
-        val paciente = servicioPaciente.obtenerPacienteFirebaseId(firebaseId)
-
-       return if (paciente != null){
+    fun obtenerPacienteByFirebaseId(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable firebaseId: String
+    ): ResponseEntity<Any> {
+        return try {
+            val paciente = servicioPaciente.obtenerPacientePorFirebaseIdConAutorizacion(
+                firebaseUidLlamante = usuarioFirebase.uid,
+                firebaseUidPaciente = firebaseId
+            )
             ResponseEntity.ok(paciente)
-        }else{
+        } catch (_: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (_: IllegalStateException) {
             ResponseEntity.notFound().build()
-       }
+        }
     }
 
+    /**
+     * Lectura por id de entidad PACIENTES_v2. Misma regla de autorización que
+     * [obtenerPacienteByFirebaseId].
+     */
     @GetMapping("/id/{id}")
-    fun obtenerPacienteById(@PathVariable id: Long?): ResponseEntity<Any> {
-        if (id == null ) return ResponseEntity.badRequest().body("El id de paciente no puede ser nulo")
+    fun obtenerPacienteById(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable id: Long?
+    ): ResponseEntity<Any> {
+        if (id == null) return ResponseEntity.badRequest().body("El id de paciente no puede ser nulo")
 
-        val paciente = servicioPaciente.obtenerPacienteId(id)
-        return if (paciente != null){
+        return try {
+            val paciente = servicioPaciente.obtenerPacientePorIdConAutorizacion(
+                firebaseUidLlamante = usuarioFirebase.uid,
+                pacienteId = id
+            )
             ResponseEntity.ok(paciente)
-        }else{
+        } catch (_: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (_: IllegalStateException) {
             ResponseEntity.notFound().build()
         }
     }

@@ -21,7 +21,15 @@ class PsicologoController(
     private val servicioPsicologo: IServicioPsicologo,
     private val usuarioRepository: UsuarioRepository
 ) : IController {
+    /**
+     * Listado completo de psicólogos. Restringido a usuarios con rol `PSICOLOGO`
+     * (p. ej. para que un psicólogo localice colegas en flujos internos). Antes de
+     * esta restricción el endpoint era un IDOR que permitía a cualquier usuario
+     * autenticado enumerar el directorio entero de psicólogos. Los pacientes deben
+     * usar `GET /api/psicologos/id/{id}` o `/api/psicologos/buscar` en su lugar.
+     */
     @GetMapping
+    @PreAuthorize("hasRole('PSICOLOGO')")
     fun obtenerPsicologos(): List<PsicologoResponse> {
         return servicioPsicologo.obtenerPsicologos()
     }
@@ -97,28 +105,51 @@ class PsicologoController(
         return ResponseEntity.ok(resultados)
     }
 
+    /**
+     * Lectura por firebaseUid del usuario psicólogo. Sólo se permite cuando el llamante
+     * coincide con el psicólogo o cuando es un paciente cuyo `psicologo_id` apunta a
+     * este psicólogo. Cualquier otro caller obtiene 403.
+     */
     @GetMapping("/firebaseId/{firebaseId}")
-    fun obtenerPsicologoByFirebaseId(@PathVariable firebaseId: String): ResponseEntity<PsicologoResponse>? {
-        val psicologo = servicioPsicologo.obtenerPsicologoFirebaseId(firebaseId)
-        return if (psicologo != null) {
+    fun obtenerPsicologoByFirebaseId(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable firebaseId: String
+    ): ResponseEntity<Any> {
+        return try {
+            val psicologo = servicioPsicologo.obtenerPsicologoPorFirebaseIdConAutorizacion(
+                firebaseUidLlamante = usuarioFirebase.uid,
+                firebaseUidPsicologo = firebaseId
+            )
             ResponseEntity.ok(psicologo)
-        } else {
+        } catch (_: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (_: IllegalStateException) {
             ResponseEntity.notFound().build()
         }
     }
 
+    /**
+     * Lectura por id de entidad PSICOLOGOS. Misma regla de autorización que
+     * [obtenerPsicologoByFirebaseId].
+     */
     @GetMapping("/id/{id}")
-    fun obtenerPsicologoById(@PathVariable id: Long?): ResponseEntity<Any> {
-
+    fun obtenerPsicologoById(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @PathVariable id: Long?
+    ): ResponseEntity<Any> {
         if (id == null) {
             return ResponseEntity.badRequest().body("El ID del psicólogo no puede ser nulo.")
         }
 
-        val psicologo = servicioPsicologo.obtenerPsicologoId(id)
-
-        return if (psicologo != null){
+        return try {
+            val psicologo = servicioPsicologo.obtenerPsicologoPorIdConAutorizacion(
+                firebaseUidLlamante = usuarioFirebase.uid,
+                psicologoId = id
+            )
             ResponseEntity.ok(psicologo)
-        }else{
+        } catch (_: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (_: IllegalStateException) {
             ResponseEntity.notFound().build()
         }
     }

@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioTarea
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
+import jakarta.validation.Valid
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRealizadaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
@@ -71,10 +72,16 @@ class TareaController(
     fun crearTarea(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long,
-        @RequestBody request: TareaCrearRequest
-    ): ResponseEntity<TareaResponse> {
-        val creada = servicioTarea.crearTarea(usuarioFirebase.uid, pacienteId, request)
-        return ResponseEntity.created(URI.create("/api/tareas/${creada.id}")).body(creada)
+        @Valid @RequestBody request: TareaCrearRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val creada = servicioTarea.crearTarea(usuarioFirebase.uid, pacienteId, request)
+            ResponseEntity.created(URI.create("/api/tareas/${creada.id}")).body(creada)
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        }
     }
 
     // PACIENTE: marcar tarea como realizada/no realizada
@@ -116,7 +123,7 @@ class TareaController(
     fun actualizarTarea(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable tareaId: Long,
-        @RequestBody request: TareaActualizarRequest
+        @Valid @RequestBody request: TareaActualizarRequest
     ): ResponseEntity<Any> {
         return try {
             val actualizada = servicioTarea.actualizarTarea(usuarioFirebase.uid, tareaId, request)

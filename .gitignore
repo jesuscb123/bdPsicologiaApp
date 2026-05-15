@@ -47,3 +47,5 @@ src/main/resources/*.json
 .GEMINI.md
 
 intstrucciones
+
+doc/FALLOS_ENCONTRADOS.md

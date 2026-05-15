@@ -10,6 +10,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.Usuario
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
@@ -18,7 +19,6 @@ import jakarta.validation.Valid
 import java.net.URI
 
 @RestController
-@CrossOrigin(origins = ["http://localhost:4200"])
 @RequestMapping("/api/usuarios")
 class UsuarioController(
    private val servicioUsuario: IServicioUsuario,
@@ -35,6 +35,7 @@ class UsuarioController(
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     fun obtenerUsuarios(): List<UsuarioResponse>{
         return servicioUsuario.obtenerUsuarios()
     }
@@ -50,7 +51,7 @@ class UsuarioController(
     @PatchMapping("/me/email")
     fun actualizarMiEmail(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody request: ActualizarEmailRequest
+        @Valid @RequestBody request: ActualizarEmailRequest
     ): ResponseEntity<Any> {
         return try {
             val perfilActualizado =
@@ -110,6 +111,7 @@ class UsuarioController(
     }
 
     @GetMapping("/{fireBaseUid}")
+    @PreAuthorize("#fireBaseUid == principal.uid")
     fun obtenerUsuarioByFireBaseId(@PathVariable fireBaseUid: String): ResponseEntity<UsuarioResponse>{
         val usuario = servicioUsuario.obtenerUsuarioByFireBaseId(fireBaseUid)
         return if (usuario != null){

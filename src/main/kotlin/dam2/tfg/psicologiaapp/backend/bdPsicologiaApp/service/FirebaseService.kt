@@ -18,18 +18,24 @@ class FirebaseService(@Autowired(required = false) private val firebaseApp: Fire
     private val executor = Executors.newCachedThreadPool()
 
     fun getUserFromToken(idToken: String): FirebaseUserData? {
-        val perfilesActivos = (System.getenv("SPRING_PROFILES_ACTIVE") ?: "")
         val cleanToken = idToken.replace("Bearer ", "").trim()
 
         // Atajo de desarrollo local: permite autenticar en Swagger sin Firebase real.
         // Formato esperado: Authorization: Bearer dev:<uid>:<email>
-        if (perfilesActivos.split(",").map { it.trim() }.contains("dev")) {
-            if (cleanToken.startsWith("dev:")) {
-                val partes = cleanToken.split(":")
-                val uid = partes.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return null
-                val email = partes.getOrNull(2)?.takeIf { it.isNotBlank() } ?: "$uid@dev.local"
-                return FirebaseUserData(uid = uid, email = email)
-            }
+        //
+        // Endurecimiento de seguridad: el atajo SOLO se activa cuando el ÚNICO perfil
+        // activo es exactamente "dev" (case-insensitive). Si SPRING_PROFILES_ACTIVE
+        // está vacío o contiene cualquier otro perfil (p. ej. "prod,dev"), el atajo
+        // permanece desactivado para evitar suplantación accidental en producción.
+        if (atajoDevActivado() && cleanToken.startsWith("dev:")) {
+            val partes = cleanToken.split(":")
+            val uid = partes.getOrNull(1)?.takeIf { it.isNotBlank() } ?: return null
+            val email = partes.getOrNull(2)?.takeIf { it.isNotBlank() } ?: "$uid@dev.local"
+            log.warn(
+                "Atajo de autenticación 'dev:' usado para uid='{}'. Modo INSEGURO reservado a desarrollo local.",
+                uid,
+            )
+            return FirebaseUserData(uid = uid, email = email)
         }
 
         if (firebaseApp == null) {
@@ -78,9 +84,29 @@ class FirebaseService(@Autowired(required = false) private val firebaseApp: Fire
         return null
     }
 
+    /**
+     * Indica si el atajo de autenticación `dev:` debe estar habilitado.
+     *
+     * Reglas (defensivas):
+     * - Si `SPRING_PROFILES_ACTIVE` es nulo o queda vacío tras normalizar, devuelve `false`.
+     * - Si hay más de un perfil activo, devuelve `false` (no se admite combinación con `dev`).
+     * - Sólo devuelve `true` cuando el único perfil activo, ignorando mayúsculas y espacios,
+     *   es exactamente `dev`.
+     */
+    private fun atajoDevActivado(): Boolean {
+        val perfilesActivos = System.getenv("SPRING_PROFILES_ACTIVE")
+            ?.split(",")
+            ?.map { it.trim().lowercase() }
+            ?.filter { it.isNotEmpty() }
+            ?: return false
+
+        return perfilesActivos.size == 1 && perfilesActivos.single() == PERFIL_DEV
+    }
+
     companion object {
         private const val VERIFICACION_TOKEN_INTENTOS = 2
         private const val VERIFICACION_TOKEN_TIMEOUT_S = 8L
         private const val VERIFICACION_TOKEN_ESPERA_MS = 200L
+        private const val PERFIL_DEV = "dev"
     }
 }

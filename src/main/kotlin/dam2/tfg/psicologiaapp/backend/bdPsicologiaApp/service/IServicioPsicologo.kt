@@ -22,4 +22,26 @@ interface IServicioPsicologo {
     fun obtenerPacientesPorFirebaseId(firebaseUidPsicologo: String): List<PacienteResponse>
 
     fun actualizarDescripcion(firebaseUidPsicologo: String, descripcion: String?): PsicologoResponse
+
+    /**
+     * Carga un psicólogo por id de entidad PSICOLOGOS verificando que el llamante puede leerlo:
+     *  - el propio psicólogo, o
+     *  - un paciente con relación establecida (paciente.psicologo_id apunta a este psicólogo).
+     *
+     * Lanza [SecurityException] si el llamante no está autorizado e [IllegalStateException]
+     * si el psicólogo no existe.
+     */
+    fun obtenerPsicologoPorIdConAutorizacion(
+        firebaseUidLlamante: String,
+        psicologoId: Long
+    ): PsicologoResponse
+
+    /**
+     * Carga un psicólogo por firebaseUid de usuario aplicando la misma regla que
+     * [obtenerPsicologoPorIdConAutorizacion].
+     */
+    fun obtenerPsicologoPorFirebaseIdConAutorizacion(
+        firebaseUidLlamante: String,
+        firebaseUidPsicologo: String
+    ): PsicologoResponse
 }

@@ -5,6 +5,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -23,12 +24,13 @@ class NotaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
     ): ResponseEntity<List<NotaResponse>> {
-        val notas = servicioNota.obtenerNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
-
-        return if (notas.isNotEmpty()) {
-            ResponseEntity.ok(notas)
-        } else {
-            ResponseEntity.noContent().build()
+        return try {
+            val notas = servicioNota.obtenerNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+            if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
         }
     }
 
@@ -72,7 +74,7 @@ class NotaController(
     @PreAuthorize("hasRole('PACIENTE')")
     fun crearNota(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
-        @RequestBody request: NotaRequest
+        @Valid @RequestBody request: NotaRequest
     ): ResponseEntity<NotaResponse> {
 
         return try {
@@ -90,7 +92,7 @@ class NotaController(
     fun actualizarNota(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable notaId: Long,
-        @RequestBody request: NotaRequest
+        @Valid @RequestBody request: NotaRequest
     ): ResponseEntity<Any> {
         return try {
             val actualizada = servicioNota.actualizarNota(usuarioFirebase.uid, notaId, request)

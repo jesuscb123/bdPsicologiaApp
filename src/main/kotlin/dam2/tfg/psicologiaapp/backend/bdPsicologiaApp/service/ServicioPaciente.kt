@@ -7,7 +7,6 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteReposit
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PacienteMapper
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.PsicologoMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,13 +17,6 @@ class ServicioPaciente(
     val servicioPsicologo: IServicioPsicologo
 
 ) : IServicioPaciente {
-
-    @Transactional
-    override fun obtenerPacientes(): List<PacienteResponse>{
-       val pacientes =  pacienteRepository.findAll()
-
-        return pacientes.map { PacienteMapper.toResponse(it) }
-    }
 
     @Transactional
     override fun obtenerPacienteFirebaseId(firebaseUsuarioId: String): PacienteResponse?{
@@ -92,5 +84,50 @@ class ServicioPaciente(
         paciente.psicologo = psicologo
         val guardado = pacienteRepository.save(paciente)
         return PacienteMapper.toResponse(guardado)
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerPacientesAsignadosA(firebaseUidPsicologo: String): List<PacienteResponse> {
+        // Delegamos en el servicio de psicólogos para reutilizar la query que ya filtra
+        // por la relación PACIENTES_v2.psicologo_id.
+        return servicioPsicologo.obtenerPacientesPorFirebaseId(firebaseUidPsicologo)
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerPacientePorIdConAutorizacion(
+        firebaseUidLlamante: String,
+        pacienteId: Long
+    ): PacienteResponse {
+        val paciente = pacienteRepository.findByIdConPsicologoYUsuarios(pacienteId)
+            ?: throw IllegalStateException("El paciente no existe")
+        verificarAccesoPaciente(firebaseUidLlamante, paciente)
+        return PacienteMapper.toResponse(paciente)
+    }
+
+    @Transactional(readOnly = true)
+    override fun obtenerPacientePorFirebaseIdConAutorizacion(
+        firebaseUidLlamante: String,
+        firebaseUidPaciente: String
+    ): PacienteResponse {
+        val paciente = pacienteRepository.findByIdFirebaseUsuario(firebaseUidPaciente)
+            ?: throw IllegalStateException("El paciente no existe")
+        verificarAccesoPaciente(firebaseUidLlamante, paciente)
+        return PacienteMapper.toResponse(paciente)
+    }
+
+    /**
+     * Regla única de autorización para lecturas individuales de paciente:
+     *  - el propio paciente puede leerse a sí mismo, o
+     *  - el psicólogo asignado al paciente puede leerlo.
+     *
+     * Cualquier otro caller produce [SecurityException], que el controlador traduce a 403.
+     */
+    private fun verificarAccesoPaciente(firebaseUidLlamante: String, paciente: Paciente) {
+        if (paciente.usuario.firebaseUid == firebaseUidLlamante) return
+
+        val psicologoAsignado = paciente.psicologo
+        if (psicologoAsignado != null && psicologoAsignado.usuario.firebaseUid == firebaseUidLlamante) return
+
+        throw SecurityException("No tienes permiso para acceder a este paciente.")
     }
 }

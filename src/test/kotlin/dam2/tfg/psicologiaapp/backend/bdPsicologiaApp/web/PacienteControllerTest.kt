@@ -58,13 +58,13 @@ internal class PacienteControllerTest {
     }
 
     @Test
-    fun `GET api pacientes devuelve 200`() {
-        whenever(servicioPaciente.obtenerPacientes()).thenReturn(emptyList())
+    fun `GET api pacientes devuelve 200 y solo los pacientes del psicologo autenticado`() {
+        whenever(servicioPaciente.obtenerPacientesAsignadosA(firebaseUser.uid)).thenReturn(emptyList())
 
         mockMvc.perform(get("/api/pacientes").with(withPsicologoUser()))
             .andExpect(status().isOk)
 
-        verify(servicioPaciente).obtenerPacientes()
+        verify(servicioPaciente).obtenerPacientesAsignadosA(firebaseUser.uid)
     }
 
     @Test
