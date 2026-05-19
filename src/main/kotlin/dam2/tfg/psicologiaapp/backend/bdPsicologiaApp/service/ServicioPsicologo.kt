@@ -104,6 +104,28 @@ class ServicioPsicologo(
     }
 
     @Transactional
+    override fun actualizarEspecialidades(
+        firebaseUidPsicologo: String,
+        especialidades: List<String>
+    ): PsicologoResponse {
+        val psicologo = psicologoRepository.findByIdFirebaseUsuario(firebaseUidPsicologo)
+            ?: throw IllegalStateException("No existe psicólogo para este usuario")
+
+        val normalizadas = especialidades
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase() }
+
+        require(normalizadas.isNotEmpty()) { "La lista de especialidades no puede estar vacía" }
+        require(normalizadas.size <= 10) { "No se pueden indicar más de 10 especialidades" }
+
+        val actualizado = psicologoRepository.save(
+            psicologo.copy(especialidades = normalizadas.toMutableList())
+        )
+        return PsicologoMapper.toResponse(actualizado)
+    }
+
+    @Transactional
     override fun actualizarDescripcion(firebaseUidPsicologo: String, descripcion: String?): PsicologoResponse {
         val psicologo = psicologoRepository.findByIdFirebaseUsuario(firebaseUidPsicologo)
             ?: throw IllegalStateException("No existe psicólogo para este usuario")

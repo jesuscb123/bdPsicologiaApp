@@ -23,6 +23,8 @@ interface IServicioPsicologo {
 
     fun actualizarDescripcion(firebaseUidPsicologo: String, descripcion: String?): PsicologoResponse
 
+    fun actualizarEspecialidades(firebaseUidPsicologo: String, especialidades: List<String>): PsicologoResponse
+
     /**
      * Carga un psicólogo por id de entidad PSICOLOGOS verificando que el llamante puede leerlo:
      *  - el propio psicólogo, o

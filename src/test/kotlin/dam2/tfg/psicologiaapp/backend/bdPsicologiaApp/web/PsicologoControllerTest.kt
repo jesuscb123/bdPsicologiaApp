@@ -117,4 +117,41 @@ internal class PsicologoControllerTest {
         verify(usuarioRepository).findByFirebaseUid(firebaseUser.uid)
         verifyNoInteractions(servicioPsicologo)
     }
+
+    @Test
+    fun `PATCH api psicologos me especialidades devuelve 200 con lista actualizada`() {
+        val respuesta = PsicologoResponse(
+            id = 1L,
+            idEntidadPsicologo = 1L,
+            firebaseUid = firebaseUser.uid,
+            nombre = "Nombre",
+            apellidos = "Apellidos",
+            fotoPerfilUrl = null,
+            numeroColegiado = "1234",
+            especialidades = listOf("Ansiedad", "Depresión"),
+            descripcion = null
+        )
+        whenever(servicioPsicologo.actualizarEspecialidades(any(), any())).thenReturn(respuesta)
+
+        mockMvc.perform(
+            patch("/api/psicologos/me/especialidades")
+                .with(withPacienteUser())
+                .contentType("application/json")
+                .content("""{"especialidades":["Ansiedad","Depresión"]}""")
+        ).andExpect(status().isOk)
+
+        verify(servicioPsicologo).actualizarEspecialidades(any(), eq(listOf("Ansiedad", "Depresión")))
+    }
+
+    @Test
+    fun `PATCH api psicologos me especialidades devuelve 400 con lista vacía`() {
+        mockMvc.perform(
+            patch("/api/psicologos/me/especialidades")
+                .with(withPacienteUser())
+                .contentType("application/json")
+                .content("""{"especialidades":[]}""")
+        ).andExpect(status().isBadRequest)
+
+        verifyNoInteractions(servicioPsicologo)
+    }
 }

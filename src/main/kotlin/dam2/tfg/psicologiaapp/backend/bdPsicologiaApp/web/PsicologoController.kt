@@ -7,6 +7,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.Pacient
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.ActualizarDescripcionPsicologoRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.ActualizarEspecialidadesPsicologoRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO.CrearPsicologoMeRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -83,6 +84,28 @@ class PsicologoController(
             val actualizado = servicioPsicologo.actualizarDescripcion(
                 firebaseUidPsicologo = usuarioFirebase.uid,
                 descripcion = request.descripcion
+            )
+            ResponseEntity.ok(actualizado)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(e.message)
+        } catch (e: IllegalStateException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del servidor: ${e.message}")
+        }
+    }
+
+    @PatchMapping("/me/especialidades")
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    fun actualizarMisEspecialidades(
+        @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
+        @Valid @RequestBody request: ActualizarEspecialidadesPsicologoRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val actualizado = servicioPsicologo.actualizarEspecialidades(
+                firebaseUidPsicologo = usuarioFirebase.uid,
+                especialidades = request.especialidades
             )
             ResponseEntity.ok(actualizado)
         } catch (e: IllegalArgumentException) {
