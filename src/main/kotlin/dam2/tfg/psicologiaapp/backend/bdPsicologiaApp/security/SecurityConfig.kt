@@ -49,6 +49,7 @@ class SecurityConfig(
 
                 auth.requestMatchers(HttpMethod.GET, "/api/archivos/perfiles/**").permitAll()
                 auth.requestMatchers(HttpMethod.GET, "/api/usuarios/existe-email").permitAll()
+                auth.requestMatchers(HttpMethod.GET, "/api/mantener-activo").permitAll()
 
                 auth.anyRequest().authenticated()
             }
