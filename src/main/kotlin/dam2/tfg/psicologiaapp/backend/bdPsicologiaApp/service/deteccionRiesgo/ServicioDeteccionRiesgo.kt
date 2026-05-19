@@ -79,11 +79,6 @@ class ServicioDeteccionRiesgo(
             // los logs con el mismo mensaje cada vez que un paciente crea una nota.
             return
         }
-        if (estaDeduplicado(pacienteId)) {
-            log.debug("Evaluación de riesgo omitida para paciente {} (dentro de la ventana de dedupe)", pacienteId)
-            return
-        }
-
         try {
             val datos = cargarDatosParaEvaluacion(pacienteId)
             if (datos == null) {
@@ -100,12 +95,16 @@ class ServicioDeteccionRiesgo(
             )
 
             if (resultado == NivelRiesgo.ALTO) {
-                servicioNotificacionesPush.notificarAlertaRiesgo(
-                    firebaseUidPsicologo = datos.firebaseUidPsicologo,
-                    pacienteId = pacienteId,
-                    nombrePaciente = datos.nombrePaciente,
-                )
-                ultimaAlertaPorPaciente[pacienteId] = Instant.now()
+                if (estaDeduplicado(pacienteId)) {
+                    log.debug("Push de riesgo omitido para paciente {} (dentro de la ventana de dedupe)", pacienteId)
+                } else {
+                    servicioNotificacionesPush.notificarAlertaRiesgo(
+                        firebaseUidPsicologo = datos.firebaseUidPsicologo,
+                        pacienteId = pacienteId,
+                        nombrePaciente = datos.nombrePaciente,
+                    )
+                    ultimaAlertaPorPaciente[pacienteId] = Instant.now()
+                }
             }
         } catch (e: Exception) {
             log.warn(
