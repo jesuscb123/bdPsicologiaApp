@@ -29,7 +29,7 @@ class PsicologoController(
      * usar `GET /api/psicologos/id/{id}` o `/api/psicologos/buscar` en su lugar.
      */
     @GetMapping
-    @PreAuthorize("hasRole('PSICOLOGO')")
+    @PreAuthorize("hasRole('PSICOLOGO') or hasRole('PACIENTE')")
     fun obtenerPsicologos(): List<PsicologoResponse> {
         return servicioPsicologo.obtenerPsicologos()
     }
