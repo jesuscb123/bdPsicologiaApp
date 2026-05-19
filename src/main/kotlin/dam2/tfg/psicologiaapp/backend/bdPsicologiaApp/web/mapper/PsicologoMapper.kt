@@ -11,7 +11,7 @@ object PsicologoMapper {
         return Psicologo(
             usuario = usuario,
             numeroColegiado = request.numeroColegiado,
-            especialidad = request.especialidad,
+            especialidades = request.especialidades.toMutableList(),
             descripcion = request.descripcion
         )
     }
@@ -26,7 +26,7 @@ object PsicologoMapper {
             fotoPerfilUrl = psicologo.usuario.fotoPerfilUrl,
 
             numeroColegiado = psicologo.numeroColegiado,
-            especialidad = psicologo.especialidad,
+            especialidades = psicologo.especialidades,
             descripcion = psicologo.descripcion
         )
     }

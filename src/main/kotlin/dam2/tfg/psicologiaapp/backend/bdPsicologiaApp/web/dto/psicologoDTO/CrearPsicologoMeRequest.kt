@@ -1,6 +1,7 @@
 package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.psicologoDTO
 
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
@@ -17,12 +18,7 @@ data class CrearPsicologoMeRequest(
     )
     val numeroColegiado: String,
 
-    @field:NotBlank(message = "La especialidad es obligatoria")
-    @field:Size(
-        min = 2,
-        max = 80,
-        message = "La especialidad debe tener entre 2 y 80 caracteres"
-    )
-    val especialidad: String
+    @field:NotEmpty(message = "Debes indicar al menos una especialidad")
+    @field:Size(max = 10, message = "Máximo 10 especialidades")
+    val especialidades: List<@NotBlank @Size(max = 80) String>
 )
-

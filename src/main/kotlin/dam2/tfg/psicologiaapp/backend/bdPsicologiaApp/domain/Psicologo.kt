@@ -16,8 +16,13 @@ data class Psicologo(
     @Column(name = "numero_colegiado", nullable = false, unique = true)
     val numeroColegiado: String,
 
-    @Column(name = "especialidad", nullable = false)
-    val especialidad: String = "",
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+        name = "psicologo_especialidades",
+        joinColumns = [JoinColumn(name = "psicologo_id")]
+    )
+    @Column(name = "especialidad", nullable = false, length = 80)
+    val especialidades: MutableList<String> = mutableListOf(),
 
     @Column(name = "descripcion", length = 1000)
     val descripcion: String? = null,
@@ -40,7 +45,5 @@ data class Psicologo(
         orphanRemoval = true
     )
     val tareas: MutableList<Tarea> = mutableListOf()
-
-
 
 )

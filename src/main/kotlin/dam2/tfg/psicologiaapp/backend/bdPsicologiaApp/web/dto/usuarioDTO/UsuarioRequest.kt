@@ -3,6 +3,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 
 @JsonTypeInfo(
@@ -41,8 +42,9 @@ data class PsicologoRequest(
     @field:Size(max = 15, message = "El número de colegiado no puede superar los 15 caracteres")
     val numeroColegiado: String,
 
-    @field:NotBlank(message = "La especialidad es obligatoria")
-    val especialidad: String,
+    @field:NotEmpty(message = "Debes indicar al menos una especialidad")
+    @field:Size(max = 10, message = "Máximo 10 especialidades")
+    val especialidades: List<@NotBlank @Size(max = 80) String>,
 
     @field:Size(max = 1000, message = "La descripción no puede superar los 1000 caracteres")
     val descripcion: String?

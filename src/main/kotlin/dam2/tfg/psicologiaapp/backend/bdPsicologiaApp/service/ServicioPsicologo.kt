@@ -80,7 +80,7 @@ class ServicioPsicologo(
             val nuevoPsicologo = Psicologo(
                 usuario = usuario,
                 numeroColegiado = psicologoRequest.numeroColegiado,
-                especialidad = psicologoRequest.especialidad,
+                especialidades = psicologoRequest.especialidades.toMutableList(),
                 descripcion = psicologoRequest.descripcion
             )
            val psicologo = psicologoRepository.save(nuevoPsicologo)

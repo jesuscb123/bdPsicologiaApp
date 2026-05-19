@@ -50,7 +50,7 @@ class PsicologoController(
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 rol = "PSICOLOGO",
                 numeroColegiado = request.numeroColegiado,
-                especialidad = request.especialidad,
+                especialidades = request.especialidades,
                 descripcion = null
             )
 

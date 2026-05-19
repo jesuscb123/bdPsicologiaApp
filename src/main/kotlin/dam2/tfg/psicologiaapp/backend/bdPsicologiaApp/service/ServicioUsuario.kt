@@ -88,7 +88,7 @@ class ServicioUsuario(
                 email = usuario.email,
                 fotoPerfilUrl = usuario.fotoPerfilUrl,
                 numeroColegiado = psicologo.numeroColegiado,
-                especialidad = psicologo.especialidad,
+                especialidades = psicologo.especialidades,
                 descripcion = psicologo.descripcion
             )
         }

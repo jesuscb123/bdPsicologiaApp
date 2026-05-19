@@ -86,7 +86,7 @@ internal class PsicologoControllerTest {
                 apellidos = "Apellidos",
                 fotoPerfilUrl = null,
                 numeroColegiado = "1234",
-                especialidad = "clinica",
+                especialidades = listOf("clinica"),
                 descripcion = null
             )
         )
@@ -95,7 +95,7 @@ internal class PsicologoControllerTest {
             post("/api/psicologos/me")
                 .with(withPacienteUser())
                 .contentType("application/json")
-                .content("""{"numeroColegiado":"1234","especialidad":"clinica"}""")
+                .content("""{"numeroColegiado":"1234","especialidades":["clinica"]}""")
         ).andExpect(status().isCreated)
 
         verify(usuarioRepository).findByFirebaseUid(firebaseUser.uid)
@@ -110,7 +110,7 @@ internal class PsicologoControllerTest {
             post("/api/psicologos/me")
                 .with(withPacienteUser())
                 .contentType("application/json")
-                .content("""{"numeroColegiado":"1234","especialidad":"clinica"}""")
+                .content("""{"numeroColegiado":"1234","especialidades":["clinica"]}""")
         )
             .andExpect(status().isConflict)
 

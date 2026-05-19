@@ -49,7 +49,7 @@ internal class NotaControllerTest {
     @Test
     fun `PUT api notas id actualiza y devuelve 200`() {
         val pacienteResp = PacienteResponse(id = 1L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos", fotoPerfilUrl = null, psicologoId = null, idPaciente = 1L)
-        val psicologoResp = PsicologoResponse(id = 1L, idEntidadPsicologo = 1L, firebaseUid = "uid-psi", nombre = "Psi", apellidos = "Apellidos", fotoPerfilUrl = null, numeroColegiado = "123", especialidad = "Esp", descripcion = null)
+        val psicologoResp = PsicologoResponse(id = 1L, idEntidadPsicologo = 1L, firebaseUid = "uid-psi", nombre = "Psi", apellidos = "Apellidos", fotoPerfilUrl = null, numeroColegiado = "123", especialidades = listOf("Esp"), descripcion = null)
         val notaResponse = NotaResponse(1L, "Asunto nuevo", "Desc nueva", LocalDateTime.now(), pacienteResp, psicologoResp)
         whenever(servicioNota.actualizarNota(eq("uid-paciente"), eq(1L), any())).thenReturn(notaResponse)
 

@@ -33,7 +33,7 @@ data class PsicologoPerfilResponse(
     override val fotoPerfilUrl: String?,
     override val rol: String = "PSICOLOGO",
     val numeroColegiado: String,
-    val especialidad: String,
+    val especialidades: List<String>,
     val descripcion: String?
 ) : UsuarioPerfilResponse()
 
