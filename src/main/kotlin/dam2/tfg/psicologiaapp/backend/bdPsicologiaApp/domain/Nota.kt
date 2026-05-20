@@ -11,10 +11,10 @@ class Nota(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @Column (nullable = false)
+    @Column(nullable = false, length = 100)
     var asunto: String = "",
 
-    @Column (nullable = false)
+    @Column(nullable = false, length = 2000)
     var descripcion: String = "",
 
     @ManyToOne (fetch = FetchType.LAZY)
