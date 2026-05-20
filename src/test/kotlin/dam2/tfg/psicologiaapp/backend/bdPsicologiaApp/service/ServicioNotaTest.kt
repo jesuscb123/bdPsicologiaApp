@@ -6,7 +6,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.deteccionRiesgo.IServicioDeteccionRiesgo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaRequest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

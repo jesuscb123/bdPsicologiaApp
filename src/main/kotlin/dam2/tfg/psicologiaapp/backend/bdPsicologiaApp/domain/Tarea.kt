@@ -3,9 +3,10 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
+// Se usa class en lugar de data class para evitar problemas con proxies Hibernate en carga lazy.
 @Entity
 @Table (name = "TAREAS")
-data class Tarea(
+class Tarea(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,

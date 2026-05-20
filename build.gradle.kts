@@ -44,10 +44,6 @@ dependencies {
 
 	// --- LIBRERÍA DE TESTING DE SEGURIDAD (Opcional pero recomendada) ---
 	testImplementation("org.springframework.security:spring-security-test")
-
-	runtimeOnly("org.postgresql:postgresql")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }
 
 // Corrección de sintaxis para Kotlin y AllOpen

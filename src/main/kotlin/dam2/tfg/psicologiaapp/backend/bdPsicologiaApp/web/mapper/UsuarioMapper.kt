@@ -26,11 +26,10 @@ object UsuarioMapper {
         )
     }
 
-    fun merge(entity: Usuario, request: UsuarioRequest): Usuario{
-        return entity.copy(
-            nombre = request.nombre,
-            apellidos = request.apellidos
-        )
+    fun merge(entity: Usuario, request: UsuarioRequest): Usuario {
+        entity.nombre = request.nombre
+        entity.apellidos = request.apellidos
+        return entity
     }
 
 

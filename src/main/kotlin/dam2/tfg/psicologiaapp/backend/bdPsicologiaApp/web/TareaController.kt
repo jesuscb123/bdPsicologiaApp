@@ -8,7 +8,6 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActu
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaActualizarRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaCrearRequest
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.tareaDTO.TareaResponse
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -56,14 +55,8 @@ class TareaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
     ): ResponseEntity<EstadoSyncResponse> {
-        return try {
-            val estado = servicioTarea.obtenerEstadoTareasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
-            ResponseEntity.ok(estado)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        val estado = servicioTarea.obtenerEstadoTareasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+        return ResponseEntity.ok(estado)
     }
 
     // PSICÓLOGO: asignar una tarea a un paciente
@@ -74,14 +67,8 @@ class TareaController(
         @PathVariable pacienteId: Long,
         @Valid @RequestBody request: TareaCrearRequest
     ): ResponseEntity<Any> {
-        return try {
-            val creada = servicioTarea.crearTarea(usuarioFirebase.uid, pacienteId, request)
-            ResponseEntity.created(URI.create("/api/tareas/${creada.id}")).body(creada)
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        }
+        val creada = servicioTarea.crearTarea(usuarioFirebase.uid, pacienteId, request)
+        return ResponseEntity.created(URI.create("/api/tareas/${creada.id}")).body(creada)
     }
 
     // PACIENTE: marcar tarea como realizada/no realizada
@@ -107,14 +94,8 @@ class TareaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable tareaId: Long
     ): ResponseEntity<TareaResponse> {
-        return try {
-            val actualizada = servicioTarea.aceptarTareaPaciente(usuarioFirebase.uid, tareaId)
-            ResponseEntity.ok(actualizada)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.notFound().build()
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        val actualizada = servicioTarea.aceptarTareaPaciente(usuarioFirebase.uid, tareaId)
+        return ResponseEntity.ok(actualizada)
     }
 
     // PSICÓLOGO: actualizar título y descripción de una tarea
@@ -125,16 +106,8 @@ class TareaController(
         @PathVariable tareaId: Long,
         @Valid @RequestBody request: TareaActualizarRequest
     ): ResponseEntity<Any> {
-        return try {
-            val actualizada = servicioTarea.actualizarTarea(usuarioFirebase.uid, tareaId, request)
-            ResponseEntity.ok(actualizada)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
-        }
+        val actualizada = servicioTarea.actualizarTarea(usuarioFirebase.uid, tareaId, request)
+        return ResponseEntity.ok(actualizada)
     }
 
     // PSICÓLOGO: eliminar una tarea propia
@@ -144,16 +117,8 @@ class TareaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable tareaId: Long
     ): ResponseEntity<Any> {
-        return try {
-            servicioTarea.eliminarTarea(usuarioFirebase.uid, tareaId)
-            ResponseEntity.noContent().build()
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
-        }
+        servicioTarea.eliminarTarea(usuarioFirebase.uid, tareaId)
+        return ResponseEntity.noContent().build()
     }
 }
 

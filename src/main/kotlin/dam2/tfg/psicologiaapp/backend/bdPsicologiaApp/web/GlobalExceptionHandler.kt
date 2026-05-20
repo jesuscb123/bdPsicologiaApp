@@ -53,6 +53,11 @@ class GlobalExceptionHandler {
             .body(mapOf("error" to "Petición incorrecta", "traceId" to traceId))
     }
 
+    /** Conflicto de recurso (p. ej. recurso ya existente): 409 Conflict. */
+    @ExceptionHandler(ConflictoRecursoException::class)
+    fun manejarConflicto(ex: ConflictoRecursoException): ResponseEntity<Map<String, String>> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(mapOf("error" to (ex.message ?: "Conflicto de recurso")))
+
     /** Captura genérica de último recurso: 500 sin información interna. */
     @ExceptionHandler(Exception::class)
     fun manejarGenerico(ex: Exception): ResponseEntity<Map<String, String>> {

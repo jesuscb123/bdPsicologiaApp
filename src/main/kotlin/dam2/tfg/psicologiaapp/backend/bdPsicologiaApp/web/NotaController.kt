@@ -3,10 +3,9 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaResponse
 import jakarta.validation.Valid
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -24,14 +23,8 @@ class NotaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
     ): ResponseEntity<List<NotaResponse>> {
-        return try {
-            val notas = servicioNota.obtenerNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
-            if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-        }
+        val notas = servicioNota.obtenerNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+        return if (notas.isNotEmpty()) ResponseEntity.ok(notas) else ResponseEntity.noContent().build()
     }
 
     @GetMapping
@@ -60,14 +53,8 @@ class NotaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable pacienteId: Long
     ): ResponseEntity<EstadoSyncResponse> {
-        return try {
-            val estado = servicioNota.obtenerEstadoNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
-            ResponseEntity.ok(estado)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        }
+        val estado = servicioNota.obtenerEstadoNotasPacienteParaPsicologo(usuarioFirebase.uid, pacienteId)
+        return ResponseEntity.ok(estado)
     }
 
     @PostMapping
@@ -94,16 +81,8 @@ class NotaController(
         @PathVariable notaId: Long,
         @Valid @RequestBody request: NotaRequest
     ): ResponseEntity<Any> {
-        return try {
-            val actualizada = servicioNota.actualizarNota(usuarioFirebase.uid, notaId, request)
-            ResponseEntity.ok(actualizada)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
-        }
+        val actualizada = servicioNota.actualizarNota(usuarioFirebase.uid, notaId, request)
+        return ResponseEntity.ok(actualizada)
     }
 
     @DeleteMapping("/{notaId}")
@@ -112,15 +91,7 @@ class NotaController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable notaId: Long
     ): ResponseEntity<Any> {
-        return try {
-            servicioNota.eliminarNota(usuarioFirebase.uid, notaId)
-            ResponseEntity.noContent().build()
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno: ${e.message}")
-        }
+        servicioNota.eliminarNota(usuarioFirebase.uid, notaId)
+        return ResponseEntity.noContent().build()
     }
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 class PacienteController(
     private val servicioPaciente: IServicioPaciente,
     private val usuarioRepository: UsuarioRepository
-) : IController{
+) {
     /**
      * Listado de pacientes. Restringido a psicólogos y filtrado al psicólogo autenticado:
      * cada psicólogo sólo ve sus propios pacientes (los que tienen `paciente.psicologo_id`
@@ -91,17 +91,11 @@ class PacienteController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable firebaseId: String
     ): ResponseEntity<Any> {
-        return try {
-            val paciente = servicioPaciente.obtenerPacientePorFirebaseIdConAutorizacion(
-                firebaseUidLlamante = usuarioFirebase.uid,
-                firebaseUidPaciente = firebaseId
-            )
-            ResponseEntity.ok(paciente)
-        } catch (_: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (_: IllegalStateException) {
-            ResponseEntity.notFound().build()
-        }
+        val paciente = servicioPaciente.obtenerPacientePorFirebaseIdConAutorizacion(
+            firebaseUidLlamante = usuarioFirebase.uid,
+            firebaseUidPaciente = firebaseId
+        )
+        return ResponseEntity.ok(paciente)
     }
 
     /**
@@ -114,18 +108,11 @@ class PacienteController(
         @PathVariable id: Long?
     ): ResponseEntity<Any> {
         if (id == null) return ResponseEntity.badRequest().body("El id de paciente no puede ser nulo")
-
-        return try {
-            val paciente = servicioPaciente.obtenerPacientePorIdConAutorizacion(
-                firebaseUidLlamante = usuarioFirebase.uid,
-                pacienteId = id
-            )
-            ResponseEntity.ok(paciente)
-        } catch (_: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (_: IllegalStateException) {
-            ResponseEntity.notFound().build()
-        }
+        val paciente = servicioPaciente.obtenerPacientePorIdConAutorizacion(
+            firebaseUidLlamante = usuarioFirebase.uid,
+            pacienteId = id
+        )
+        return ResponseEntity.ok(paciente)
     }
 
     @PatchMapping("/me/psicologo")

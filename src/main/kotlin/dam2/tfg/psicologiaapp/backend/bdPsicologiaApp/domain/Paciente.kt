@@ -2,9 +2,10 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 
 import jakarta.persistence.*
 
+// Se usa class en lugar de data class para evitar problemas con proxies Hibernate en carga lazy.
 @Entity
 @Table (name = "PACIENTES_v2")
-data class Paciente(
+class Paciente(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

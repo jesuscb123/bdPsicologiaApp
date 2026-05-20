@@ -119,9 +119,9 @@ class ServicioPsicologo(
         require(normalizadas.isNotEmpty()) { "La lista de especialidades no puede estar vacía" }
         require(normalizadas.size <= 10) { "No se pueden indicar más de 10 especialidades" }
 
-        val actualizado = psicologoRepository.save(
-            psicologo.copy(especialidades = normalizadas.toMutableList())
-        )
+        psicologo.especialidades.clear()
+        psicologo.especialidades.addAll(normalizadas)
+        val actualizado = psicologoRepository.save(psicologo)
         return PsicologoMapper.toResponse(actualizado)
     }
 
@@ -134,10 +134,8 @@ class ServicioPsicologo(
             ?.trim()
             ?.takeIf { it.isNotBlank() }
 
-        val actualizado = psicologoRepository.save(
-            psicologo.copy(descripcion = descripcionNormalizada)
-        )
-
+        psicologo.descripcion = descripcionNormalizada
+        val actualizado = psicologoRepository.save(psicologo)
         return PsicologoMapper.toResponse(actualizado)
     }
 

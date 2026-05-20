@@ -3,8 +3,8 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.NotaRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.deteccionRiesgo.IServicioDeteccionRiesgo
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper.NotaMapper
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull

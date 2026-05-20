@@ -9,9 +9,10 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 
+// Se usa class en lugar de data class para evitar problemas con proxies Hibernate en carga lazy.
 @Entity
 @Table (name = "USUARIOS")
-data class Usuario(
+class Usuario(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

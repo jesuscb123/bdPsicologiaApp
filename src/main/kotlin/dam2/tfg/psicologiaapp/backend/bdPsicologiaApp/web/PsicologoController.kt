@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 class PsicologoController(
     private val servicioPsicologo: IServicioPsicologo,
     private val usuarioRepository: UsuarioRepository
-) : IController {
+) {
     /**
      * Listado completo de psicólogos. Restringido a usuarios con rol `PSICOLOGO`
      * (p. ej. para que un psicólogo localice colegas en flujos internos). Antes de
@@ -80,20 +80,11 @@ class PsicologoController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @Valid @RequestBody request: ActualizarDescripcionPsicologoRequest
     ): ResponseEntity<Any> {
-        return try {
-            val actualizado = servicioPsicologo.actualizarDescripcion(
-                firebaseUidPsicologo = usuarioFirebase.uid,
-                descripcion = request.descripcion
-            )
-            ResponseEntity.ok(actualizado)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(e.message)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
-        }
+        val actualizado = servicioPsicologo.actualizarDescripcion(
+            firebaseUidPsicologo = usuarioFirebase.uid,
+            descripcion = request.descripcion
+        )
+        return ResponseEntity.ok(actualizado)
     }
 
     @PatchMapping("/me/especialidades")
@@ -102,20 +93,11 @@ class PsicologoController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @Valid @RequestBody request: ActualizarEspecialidadesPsicologoRequest
     ): ResponseEntity<Any> {
-        return try {
-            val actualizado = servicioPsicologo.actualizarEspecialidades(
-                firebaseUidPsicologo = usuarioFirebase.uid,
-                especialidades = request.especialidades
-            )
-            ResponseEntity.ok(actualizado)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(e.message)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
-        }
+        val actualizado = servicioPsicologo.actualizarEspecialidades(
+            firebaseUidPsicologo = usuarioFirebase.uid,
+            especialidades = request.especialidades
+        )
+        return ResponseEntity.ok(actualizado)
     }
 
     @GetMapping("/buscar")
@@ -138,17 +120,11 @@ class PsicologoController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @PathVariable firebaseId: String
     ): ResponseEntity<Any> {
-        return try {
-            val psicologo = servicioPsicologo.obtenerPsicologoPorFirebaseIdConAutorizacion(
-                firebaseUidLlamante = usuarioFirebase.uid,
-                firebaseUidPsicologo = firebaseId
-            )
-            ResponseEntity.ok(psicologo)
-        } catch (_: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (_: IllegalStateException) {
-            ResponseEntity.notFound().build()
-        }
+        val psicologo = servicioPsicologo.obtenerPsicologoPorFirebaseIdConAutorizacion(
+            firebaseUidLlamante = usuarioFirebase.uid,
+            firebaseUidPsicologo = firebaseId
+        )
+        return ResponseEntity.ok(psicologo)
     }
 
     /**
@@ -163,18 +139,11 @@ class PsicologoController(
         if (id == null) {
             return ResponseEntity.badRequest().body("El ID del psicólogo no puede ser nulo.")
         }
-
-        return try {
-            val psicologo = servicioPsicologo.obtenerPsicologoPorIdConAutorizacion(
-                firebaseUidLlamante = usuarioFirebase.uid,
-                psicologoId = id
-            )
-            ResponseEntity.ok(psicologo)
-        } catch (_: SecurityException) {
-            ResponseEntity.status(HttpStatus.FORBIDDEN).build()
-        } catch (_: IllegalStateException) {
-            ResponseEntity.notFound().build()
-        }
+        val psicologo = servicioPsicologo.obtenerPsicologoPorIdConAutorizacion(
+            firebaseUidLlamante = usuarioFirebase.uid,
+            psicologoId = id
+        )
+        return ResponseEntity.ok(psicologo)
     }
 
     @GetMapping("/me/pacientes")

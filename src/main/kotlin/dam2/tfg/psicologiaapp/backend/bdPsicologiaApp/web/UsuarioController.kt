@@ -26,12 +26,8 @@ class UsuarioController(
 
     @GetMapping("/existe-email")
     fun existeCorreo(@RequestParam email: String): ResponseEntity<Any> {
-        return try {
-            val existe = servicioUsuario.existeCorreo(email)
-            ResponseEntity.ok(ExisteCorreoResponse(existe = existe))
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(e.message)
-        }
+        val existe = servicioUsuario.existeCorreo(email)
+        return ResponseEntity.ok(ExisteCorreoResponse(existe = existe))
     }
 
     @GetMapping
@@ -73,41 +69,25 @@ class UsuarioController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @RequestPart("archivo") archivo: MultipartFile,
     ): ResponseEntity<Any> {
-        return try {
-            if (archivo.isEmpty) {
-                return ResponseEntity.badRequest().body("El archivo está vacío")
-            }
-            val basePublica = OrigenHttpPeticion.basePublica(request)
-            val perfilActualizado = servicioUsuario.subirFotoPerfilDesdeArchivo(
-                firebaseUid = usuarioFirebase.uid,
-                bytes = archivo.bytes,
-                tipoContenido = archivo.contentType,
-                basePublicaOrigen = basePublica,
-            )
-            ResponseEntity.ok(perfilActualizado)
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(e.message)
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
+        if (archivo.isEmpty) {
+            return ResponseEntity.badRequest().body("El archivo está vacío")
         }
+        val basePublica = OrigenHttpPeticion.basePublica(request)
+        val perfilActualizado = servicioUsuario.subirFotoPerfilDesdeArchivo(
+            firebaseUid = usuarioFirebase.uid,
+            bytes = archivo.bytes,
+            tipoContenido = archivo.contentType,
+            basePublicaOrigen = basePublica,
+        )
+        return ResponseEntity.ok(perfilActualizado)
     }
 
     @DeleteMapping("/me")
     fun eliminarMiUsuario(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData
     ): ResponseEntity<Any> {
-        return try {
-            servicioUsuario.eliminarUsuario(usuarioFirebase.uid)
-            ResponseEntity.noContent().build()
-        } catch (e: IllegalStateException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
-        }
+        servicioUsuario.eliminarUsuario(usuarioFirebase.uid)
+        return ResponseEntity.noContent().build()
     }
 
     @GetMapping("/{fireBaseUid}")
@@ -126,24 +106,16 @@ class UsuarioController(
         @AuthenticationPrincipal usuarioFirebase: FirebaseUserData,
         @Valid @RequestBody usuarioRequest: UsuarioRequest
     ): ResponseEntity<Any> {
-        return try {
-            if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
-                return errorUsuarioExiste(usuarioFirebase)
-            }
-
-            val usuarioGuardado = servicioUsuario.crearUsuario(
-                fireBaseUid = usuarioFirebase.uid,
-                email = usuarioFirebase.email,
-                request = usuarioRequest
-            )
-
-            ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.firebaseUid}"))
-                .body(usuarioGuardado)
-
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Error interno del servidor: ${e.message}")
+        if (servicioUsuario.obtenerUsuarioByFireBaseId(usuarioFirebase.uid) != null) {
+            return errorUsuarioExiste(usuarioFirebase)
         }
+        val usuarioGuardado = servicioUsuario.crearUsuario(
+            fireBaseUid = usuarioFirebase.uid,
+            email = usuarioFirebase.email,
+            request = usuarioRequest
+        )
+        return ResponseEntity.created(URI.create("/api/usuarios/${usuarioGuardado.firebaseUid}"))
+            .body(usuarioGuardado)
     }
 
     private fun errorUsuarioExiste(usuarioFirebase: FirebaseUserData): ResponseEntity<Any>{

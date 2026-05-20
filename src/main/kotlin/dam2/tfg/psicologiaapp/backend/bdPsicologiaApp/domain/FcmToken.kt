@@ -30,7 +30,8 @@ import java.time.LocalDateTime
         Index(name = "idx_fcm_token_usuario", columnList = "usuario_id"),
     ],
 )
-data class FcmToken(
+// Se usa class en lugar de data class para evitar problemas con proxies Hibernate en carga lazy.
+class FcmToken(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

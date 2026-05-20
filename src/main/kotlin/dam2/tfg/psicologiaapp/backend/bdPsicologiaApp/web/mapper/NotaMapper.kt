@@ -3,8 +3,8 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.mapper
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Nota
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Paciente
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Psicologo
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaRequest
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaResponse
 
 object NotaMapper {
     fun toResponse(nota: Nota): NotaResponse {

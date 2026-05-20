@@ -2,9 +2,10 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain
 
 import jakarta.persistence.*
 
+// Se usa class en lugar de data class para evitar problemas con proxies Hibernate en carga lazy.
 @Entity
 @Table (name = "PSICOLOGOS")
-data class Psicologo(
+class Psicologo(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -25,7 +26,7 @@ data class Psicologo(
     val especialidades: MutableList<String> = mutableListOf(),
 
     @Column(name = "descripcion", length = 1000)
-    val descripcion: String? = null,
+    var descripcion: String? = null,
 
     @OneToMany(mappedBy = "psicologo", fetch = FetchType.LAZY)
     val pacientesAsociados: MutableList<Paciente> = mutableListOf(),
