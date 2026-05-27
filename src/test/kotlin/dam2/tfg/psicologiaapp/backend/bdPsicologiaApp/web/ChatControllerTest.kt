@@ -10,7 +10,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
@@ -107,5 +109,35 @@ internal class ChatControllerTest {
 
         mockMvc.perform(post("/api/chats/pacientes/20").with(withPsicologoAuth()))
             .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `POST notificar devuelve 204 cuando ok`() {
+        doNothing().whenever(servicioChat).notificarMensajeChat(
+            eq(pacienteUser.uid), eq("chat-1"), eq("Hola")
+        )
+
+        mockMvc.perform(
+            post("/api/chats/notificar")
+                .with(withPacienteAuth())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"chatId":"chat-1","vistaPreviaTexto":"Hola"}""")
+        ).andExpect(status().isNoContent)
+
+        verify(servicioChat).notificarMensajeChat(pacienteUser.uid, "chat-1", "Hola")
+    }
+
+    @Test
+    fun `POST notificar devuelve 403 cuando acceso denegado`() {
+        whenever(
+            servicioChat.notificarMensajeChat(any(), any(), any())
+        ).thenThrow(SecurityException("No pertenece al chat"))
+
+        mockMvc.perform(
+            post("/api/chats/notificar")
+                .with(withPacienteAuth())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"chatId":"chat-1","vistaPreviaTexto":"Hola"}""")
+        ).andExpect(status().isForbidden)
     }
 }

@@ -2,6 +2,7 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioUsuario
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioBasicoResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.UsuarioPerfilBasicoResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -9,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.http.MediaType
@@ -138,5 +140,58 @@ internal class UsuarioControllerTest {
             .andExpect(status().isNoContent)
 
         verify(servicioUsuario).eliminarUsuario("uid1")
+    }
+
+    @Test
+    fun `GET api usuarios firebaseUid devuelve 200 cuando existe`() {
+        val usuario = UsuarioBasicoResponse(1L, "uid1", "Nombre", "Apellidos", null)
+        whenever(servicioUsuario.obtenerUsuarioByFireBaseId("uid1")).thenReturn(usuario)
+
+        mockMvc.perform(get("/api/usuarios/uid1").with(withFirebaseUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firebaseUid").value("uid1"))
+
+        verify(servicioUsuario).obtenerUsuarioByFireBaseId("uid1")
+    }
+
+    @Test
+    fun `GET api usuarios firebaseUid devuelve 404 cuando no existe`() {
+        whenever(servicioUsuario.obtenerUsuarioByFireBaseId("uid1")).thenReturn(null)
+
+        mockMvc.perform(get("/api/usuarios/uid1").with(withFirebaseUser()))
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `POST api usuarios devuelve 201 cuando crea usuario`() {
+        val creado = UsuarioBasicoResponse(1L, "uid1", "Nombre", "Apellidos", null)
+        whenever(servicioUsuario.obtenerUsuarioByFireBaseId("uid1")).thenReturn(null)
+        whenever(servicioUsuario.crearUsuario(eq("uid1"), eq("a@b.com"), any())).thenReturn(creado)
+
+        mockMvc.perform(
+            post("/api/usuarios")
+                .with(withFirebaseUser())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"nombre":"Nombre","apellidos":"Apellidos","fotoPerfilUrl":null,"rol":"PACIENTE","psicologoId":null}""")
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.firebaseUid").value("uid1"))
+
+        verify(servicioUsuario).crearUsuario(eq("uid1"), eq("a@b.com"), any())
+    }
+
+    @Test
+    fun `POST api usuarios devuelve 409 cuando usuario ya existe`() {
+        val existente = UsuarioBasicoResponse(1L, "uid1", "Nombre", "Apellidos", null)
+        whenever(servicioUsuario.obtenerUsuarioByFireBaseId("uid1")).thenReturn(existente)
+
+        mockMvc.perform(
+            post("/api/usuarios")
+                .with(withFirebaseUser())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"nombre":"Nombre","apellidos":"Apellidos","fotoPerfilUrl":null,"rol":"PACIENTE","psicologoId":null}""")
+        ).andExpect(status().isConflict)
+
+        verify(servicioUsuario, never()).crearUsuario(any(), any(), any())
     }
 }

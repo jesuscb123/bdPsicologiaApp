@@ -4,6 +4,8 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PacienteRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.PsicologoRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteRequest
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -168,5 +170,54 @@ internal class ServicioUsuarioTest {
         verify(usuarioRepository).delete(usuario)
         verify(pacienteRepository, never()).delete(any())
         verify(psicologoRepository, never()).delete(any())
+    }
+
+    @Test
+    fun `obtenerUsuarios devuelve lista resuelta por rol`() {
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
+        whenever(usuarioRepository.findAll()).thenReturn(listOf(usuario))
+        whenever(psicologoRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
+        whenever(pacienteRepository.findByIdFirebaseUsuario("uid1")).thenReturn(null)
+
+        val resultado = servicio.obtenerUsuarios()
+
+        assertEquals(1, resultado.size)
+        assertEquals("SIN_ROL", resultado[0].rol)
+    }
+
+    @Test
+    fun `crearUsuario delega en servicio paciente para rol PACIENTE`() {
+        val request = PacienteRequest("Nombre", "Apellidos", null, psicologoId = null)
+        val usuario = Usuario(1L, "uid1", "a@b.com", "Nombre", "Apellidos", null)
+        val pacienteResponse = PacienteResponse(
+            id = 1L, firebaseUid = "uid1", nombre = "Nombre", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = null, idPaciente = 10L,
+        )
+        whenever(usuarioRepository.findByFirebaseUid("uid1")).thenReturn(usuario)
+        whenever(servicioPaciente.crearPaciente(usuario, request)).thenReturn(pacienteResponse)
+
+        val resultado = servicio.crearUsuario("uid1", "a@b.com", request)
+
+        assertEquals(10L, (resultado as PacienteResponse).idPaciente)
+        verify(servicioPaciente).crearPaciente(usuario, request)
+    }
+
+    @Test
+    fun `crearUsuario crea entidad usuario cuando no existe y delega`() {
+        val request = PacienteRequest("Nombre", "Apellidos", null, psicologoId = null)
+        val usuarioNuevo = Usuario(null, "uid-nuevo", "nuevo@b.com", "Nombre", "Apellidos", null)
+        val usuarioGuardado = Usuario(5L, "uid-nuevo", "nuevo@b.com", "Nombre", "Apellidos", null)
+        val pacienteResponse = PacienteResponse(
+            id = 5L, firebaseUid = "uid-nuevo", nombre = "Nombre", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = null, idPaciente = 15L,
+        )
+        whenever(usuarioRepository.findByFirebaseUid("uid-nuevo")).thenReturn(null)
+        whenever(usuarioRepository.save(any<Usuario>())).thenReturn(usuarioGuardado)
+        whenever(servicioPaciente.crearPaciente(usuarioGuardado, request)).thenReturn(pacienteResponse)
+
+        val resultado = servicio.crearUsuario("uid-nuevo", "nuevo@b.com", request)
+
+        assertEquals(15L, (resultado as PacienteResponse).idPaciente)
+        verify(usuarioRepository).save(any())
     }
 }

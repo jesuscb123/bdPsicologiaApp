@@ -31,7 +31,7 @@ internal class ServicioChatTest {
 
     private fun psicologoConUid(uid: String = "uid-psi"): Psicologo {
         val usuario = Usuario(1L, uid, "psi@test.com", "Psico", "Logo", null)
-        return Psicologo(10L, usuario, "COL-001", "Clínica", null)
+        return Psicologo(10L, usuario, "COL-001", mutableListOf("Clínica"), null)
     }
 
     private fun pacienteAsignadoA(psicologo: Psicologo): Paciente =
@@ -91,7 +91,7 @@ internal class ServicioChatTest {
     fun `asegurarChatPsicologo lanza SecurityException cuando el paciente no esta asignado a este psicologo`() {
         val psicologoPropietario = psicologoConUid("uid-psi")
         val otroUsuarioPsi = Usuario(3L, "uid-psi-otro", "otro@test.com", "Otro", "Psi", null)
-        val otroPsicologo = Psicologo(99L, otroUsuarioPsi, "COL-999", "Otra", null)
+        val otroPsicologo = Psicologo(99L, otroUsuarioPsi, "COL-999", mutableListOf("Otra"), null)
         val pacienteDeOtroPsicologo = Paciente(20L, usuarioPaciente(), otroPsicologo)
 
         whenever(psicologoRepository.findByIdFirebaseUsuario("uid-psi")).thenReturn(psicologoPropietario)
@@ -114,6 +114,50 @@ internal class ServicioChatTest {
 
         assertThrows<SecurityException> {
             servicio.asegurarChatPsicologo("uid-psi", 20L)
+        }
+    }
+
+    @Test
+    fun `notificarMensajeChat lanza cuando chatId esta vacio`() {
+        assertThrows<IllegalArgumentException> {
+            servicio.notificarMensajeChat("uid-pac", "", "Hola")
+        }
+    }
+
+    @Test
+    fun `notificarMensajeChat lanza cuando el formato de chatId es invalido`() {
+        assertThrows<IllegalArgumentException> {
+            servicio.notificarMensajeChat("uid-pac", "chat-invalido", "Hola")
+        }
+    }
+
+    @Test
+    fun `notificarMensajeChat envia push al psicologo cuando escribe el paciente`() {
+        val psicologo = psicologoConUid()
+        val paciente = pacienteAsignadoA(psicologo)
+        val chatId = "paciente_20_psicologo_10"
+        whenever(pacienteRepository.findById(20L)).thenReturn(Optional.of(paciente))
+
+        servicio.notificarMensajeChat("uid-pac", chatId, "  Mensaje de prueba  ")
+
+        verify(servicioNotificacionesPush).notificarNuevoMensajeChat(
+            firebaseUidDestinatario = "uid-psi",
+            chatId = chatId,
+            nombreRemitente = "Paci Ente",
+            vistaPreviaTexto = "Mensaje de prueba",
+            pacienteId = 20L,
+            psicologoId = 10L,
+        )
+    }
+
+    @Test
+    fun `notificarMensajeChat lanza SecurityException cuando el remitente no participa en el chat`() {
+        val psicologo = psicologoConUid()
+        val paciente = pacienteAsignadoA(psicologo)
+        whenever(pacienteRepository.findById(20L)).thenReturn(Optional.of(paciente))
+
+        assertThrows<SecurityException> {
+            servicio.notificarMensajeChat("uid-intruso", "paciente_20_psicologo_10", "Hola")
         }
     }
 }

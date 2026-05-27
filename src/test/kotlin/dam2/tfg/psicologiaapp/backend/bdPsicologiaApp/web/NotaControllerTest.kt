@@ -2,7 +2,8 @@ package dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web
 
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioNota
-import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.NotaDTO.NotaResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.EstadoSyncResponse
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.notaDto.NotaResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import java.time.LocalDateTime
@@ -73,5 +74,103 @@ internal class NotaControllerTest {
             .andExpect(status().isNoContent)
 
         verify(servicioNota).eliminarNota("uid-paciente", 1L)
+    }
+
+    @Test
+    fun `GET api notas devuelve 200 con notas del paciente`() {
+        val nota = notaEjemplo()
+        whenever(servicioNota.obtenerNotasPaciente("uid-paciente")).thenReturn(listOf(nota))
+
+        mockMvc.perform(get("/api/notas").with(withPacienteUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].asunto").value("Asunto nuevo"))
+
+        verify(servicioNota).obtenerNotasPaciente("uid-paciente")
+    }
+
+    @Test
+    fun `GET api notas devuelve 204 cuando no hay notas`() {
+        whenever(servicioNota.obtenerNotasPaciente("uid-paciente")).thenReturn(emptyList())
+
+        mockMvc.perform(get("/api/notas").with(withPacienteUser()))
+            .andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `GET api notas estado devuelve 200`() {
+        val estado = EstadoSyncResponse(LocalDateTime.of(2026, 5, 27, 10, 0), 3L)
+        whenever(servicioNota.obtenerEstadoNotasPaciente("uid-paciente")).thenReturn(estado)
+
+        mockMvc.perform(get("/api/notas/estado").with(withPacienteUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.total").value(3))
+
+        verify(servicioNota).obtenerEstadoNotasPaciente("uid-paciente")
+    }
+
+    @Test
+    fun `GET api notas pacientes id devuelve 200 para psicologo`() {
+        val nota = notaEjemplo()
+        whenever(servicioNota.obtenerNotasPacienteParaPsicologo("uid-paciente", 20L))
+            .thenReturn(listOf(nota))
+
+        mockMvc.perform(get("/api/notas/pacientes/20").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].id").value(1))
+
+        verify(servicioNota).obtenerNotasPacienteParaPsicologo("uid-paciente", 20L)
+    }
+
+    @Test
+    fun `GET api notas pacientes id estado devuelve 200 para psicologo`() {
+        val estado = EstadoSyncResponse(LocalDateTime.of(2026, 5, 27, 10, 0), 2L)
+        whenever(servicioNota.obtenerEstadoNotasPacienteParaPsicologo("uid-paciente", 20L))
+            .thenReturn(estado)
+
+        mockMvc.perform(get("/api/notas/pacientes/20/estado").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.total").value(2))
+    }
+
+    @Test
+    fun `POST api notas crea nota y devuelve 201`() {
+        val nota = notaEjemplo()
+        whenever(servicioNota.crearNota(eq("uid-paciente"), any())).thenReturn(nota)
+
+        mockMvc.perform(
+            post("/api/notas")
+                .with(withPacienteUser())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"asunto":"Asunto nuevo","descripcion":"Desc nueva"}""")
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.asunto").value("Asunto nuevo"))
+
+        verify(servicioNota).crearNota(eq("uid-paciente"), any())
+    }
+
+    private fun withPsicologoUser(): org.springframework.test.web.servlet.request.RequestPostProcessor {
+        val auth = UsernamePasswordAuthenticationToken(
+            firebaseUser,
+            null,
+            listOf(SimpleGrantedAuthority("ROLE_PSICOLOGO"))
+        )
+        return org.springframework.test.web.servlet.request.RequestPostProcessor { request ->
+            org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = auth
+            request
+        }
+    }
+
+    private fun notaEjemplo(): NotaResponse {
+        val pacienteResp = PacienteResponse(
+            id = 1L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = null, idPaciente = 1L,
+        )
+        val psicologoResp = PsicologoResponse(
+            id = 1L, idEntidadPsicologo = 1L, firebaseUid = "uid-psi", nombre = "Psi",
+            apellidos = "Apellidos", fotoPerfilUrl = null, numeroColegiado = "123",
+            especialidades = listOf("Esp"), descripcion = null,
+        )
+        return NotaResponse(1L, "Asunto nuevo", "Desc nueva", LocalDateTime.now(), pacienteResp, psicologoResp)
     }
 }

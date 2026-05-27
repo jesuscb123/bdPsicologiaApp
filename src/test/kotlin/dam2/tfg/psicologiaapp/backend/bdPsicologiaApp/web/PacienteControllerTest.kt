@@ -24,6 +24,7 @@ internal class PacienteControllerTest {
     private lateinit var usuarioRepository: UsuarioRepository
 
     private val firebaseUser = FirebaseUserData("uid-psi", "psi@b.com")
+    private val pacienteUser = FirebaseUserData("uid-pac", "pac@b.com")
 
     @BeforeEach
     fun setUp() {
@@ -40,6 +41,18 @@ internal class PacienteControllerTest {
             firebaseUser,
             null,
             listOf(SimpleGrantedAuthority("ROLE_PSICOLOGO"))
+        )
+        return org.springframework.test.web.servlet.request.RequestPostProcessor { request ->
+            org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = auth
+            request
+        }
+    }
+
+    private fun withPacienteUser(): org.springframework.test.web.servlet.request.RequestPostProcessor {
+        val auth = UsernamePasswordAuthenticationToken(
+            pacienteUser,
+            null,
+            listOf(SimpleGrantedAuthority("ROLE_PACIENTE"))
         )
         return org.springframework.test.web.servlet.request.RequestPostProcessor { request ->
             org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = auth
@@ -114,5 +127,77 @@ internal class PacienteControllerTest {
 
         verify(usuarioRepository).findByFirebaseUid(firebaseUser.uid)
         verify(servicioPaciente).crearPaciente(eq(usuario), any())
+    }
+
+    @Test
+    fun `GET api pacientes me devuelve 200 cuando existe`() {
+        val respuesta = PacienteResponse(
+            id = 1L, firebaseUid = pacienteUser.uid, nombre = "Nombre", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = 2L, idPaciente = 1L,
+        )
+        whenever(servicioPaciente.obtenerPacienteFirebaseId(pacienteUser.uid)).thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/pacientes/me").with(withPacienteUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firebaseUid").value(pacienteUser.uid))
+
+        verify(servicioPaciente).obtenerPacienteFirebaseId(pacienteUser.uid)
+    }
+
+    @Test
+    fun `GET api pacientes me devuelve 404 cuando no existe`() {
+        whenever(servicioPaciente.obtenerPacienteFirebaseId(pacienteUser.uid)).thenReturn(null)
+
+        mockMvc.perform(get("/api/pacientes/me").with(withPacienteUser()))
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `GET api pacientes firebaseId devuelve 200`() {
+        val respuesta = PacienteResponse(
+            id = 1L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = 2L, idPaciente = 1L,
+        )
+        whenever(
+            servicioPaciente.obtenerPacientePorFirebaseIdConAutorizacion(firebaseUser.uid, "uid-pac")
+        ).thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/pacientes/firebaseId/uid-pac").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firebaseUid").value("uid-pac"))
+    }
+
+    @Test
+    fun `GET api pacientes id devuelve 200`() {
+        val respuesta = PacienteResponse(
+            id = 1L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = 2L, idPaciente = 5L,
+        )
+        whenever(servicioPaciente.obtenerPacientePorIdConAutorizacion(firebaseUser.uid, 5L))
+            .thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/pacientes/id/5").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.idPaciente").value(5))
+    }
+
+    @Test
+    fun `PATCH api pacientes me psicologo devuelve 200`() {
+        val respuesta = PacienteResponse(
+            id = 1L, firebaseUid = pacienteUser.uid, nombre = "Nombre", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = 3L, idPaciente = 1L,
+        )
+        whenever(servicioPaciente.actualizarPsicologo(pacienteUser.uid, 3L)).thenReturn(respuesta)
+
+        mockMvc.perform(
+            patch("/api/pacientes/me/psicologo")
+                .with(withPacienteUser())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"psicologoId":3}""")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.psicologoId").value(3))
+
+        verify(servicioPaciente).actualizarPsicologo(pacienteUser.uid, 3L)
     }
 }

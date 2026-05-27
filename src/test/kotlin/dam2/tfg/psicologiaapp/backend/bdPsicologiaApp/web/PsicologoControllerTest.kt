@@ -4,6 +4,7 @@ import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.FirebaseUserData
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.domain.Usuario
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.repository.UsuarioRepository
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.service.IServicioPsicologo
+import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PacienteResponse
 import dam2.tfg.psicologiaapp.backend.bdPsicologiaApp.web.dto.usuarioDTO.PsicologoResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,6 +24,7 @@ internal class PsicologoControllerTest {
     private lateinit var usuarioRepository: UsuarioRepository
 
     private val firebaseUser = FirebaseUserData("uid-paciente", "pac@b.com")
+    private val psicologoUser = FirebaseUserData("uid-psi", "psi@b.com")
 
     @BeforeEach
     fun setUp() {
@@ -39,6 +41,18 @@ internal class PsicologoControllerTest {
             firebaseUser,
             null,
             listOf(SimpleGrantedAuthority("ROLE_PACIENTE"))
+        )
+        return org.springframework.test.web.servlet.request.RequestPostProcessor { request ->
+            org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = auth
+            request
+        }
+    }
+
+    private fun withPsicologoUser(): org.springframework.test.web.servlet.request.RequestPostProcessor {
+        val auth = UsernamePasswordAuthenticationToken(
+            psicologoUser,
+            null,
+            listOf(SimpleGrantedAuthority("ROLE_PSICOLOGO"))
         )
         return org.springframework.test.web.servlet.request.RequestPostProcessor { request ->
             org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = auth
@@ -153,5 +167,98 @@ internal class PsicologoControllerTest {
         ).andExpect(status().isBadRequest)
 
         verifyNoInteractions(servicioPsicologo)
+    }
+
+    @Test
+    fun `GET api psicologos me devuelve 200 cuando existe`() {
+        val respuesta = PsicologoResponse(
+            id = 1L, idEntidadPsicologo = 10L, firebaseUid = psicologoUser.uid,
+            nombre = "Nombre", apellidos = "Apellidos", fotoPerfilUrl = null,
+            numeroColegiado = "1234", especialidades = listOf("clinica"), descripcion = null,
+        )
+        whenever(servicioPsicologo.obtenerPsicologoFirebaseId(psicologoUser.uid)).thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/psicologos/me").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firebaseUid").value(psicologoUser.uid))
+    }
+
+    @Test
+    fun `GET api psicologos me devuelve 404 cuando no existe`() {
+        whenever(servicioPsicologo.obtenerPsicologoFirebaseId(psicologoUser.uid)).thenReturn(null)
+
+        mockMvc.perform(get("/api/psicologos/me").with(withPsicologoUser()))
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `GET api psicologos firebaseId devuelve 200`() {
+        val respuesta = PsicologoResponse(
+            id = 1L, idEntidadPsicologo = 10L, firebaseUid = "uid-psi",
+            nombre = "Psi", apellidos = "Apellidos", fotoPerfilUrl = null,
+            numeroColegiado = "1234", especialidades = listOf("clinica"), descripcion = null,
+        )
+        whenever(
+            servicioPsicologo.obtenerPsicologoPorFirebaseIdConAutorizacion(firebaseUser.uid, "uid-psi")
+        ).thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/psicologos/firebaseId/uid-psi").with(withPacienteUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firebaseUid").value("uid-psi"))
+    }
+
+    @Test
+    fun `GET api psicologos id devuelve 200`() {
+        val respuesta = PsicologoResponse(
+            id = 1L, idEntidadPsicologo = 10L, firebaseUid = "uid-psi",
+            nombre = "Psi", apellidos = "Apellidos", fotoPerfilUrl = null,
+            numeroColegiado = "1234", especialidades = listOf("clinica"), descripcion = null,
+        )
+        whenever(servicioPsicologo.obtenerPsicologoPorIdConAutorizacion(firebaseUser.uid, 10L))
+            .thenReturn(respuesta)
+
+        mockMvc.perform(get("/api/psicologos/id/10").with(withPacienteUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.idEntidadPsicologo").value(10))
+    }
+
+    @Test
+    fun `GET api psicologos me pacientes devuelve 200 con lista`() {
+        val paciente = PacienteResponse(
+            id = 2L, firebaseUid = "uid-pac", nombre = "Pac", apellidos = "Apellidos",
+            fotoPerfilUrl = null, psicologoId = 10L, idPaciente = 20L,
+        )
+        whenever(servicioPsicologo.obtenerPacientesPorFirebaseId(psicologoUser.uid))
+            .thenReturn(listOf(paciente))
+
+        mockMvc.perform(get("/api/psicologos/me/pacientes").with(withPsicologoUser()))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[0].idPaciente").value(20))
+    }
+
+    @Test
+    fun `GET api psicologos me pacientes devuelve 204 cuando vacio`() {
+        whenever(servicioPsicologo.obtenerPacientesPorFirebaseId(psicologoUser.uid)).thenReturn(emptyList())
+
+        mockMvc.perform(get("/api/psicologos/me/pacientes").with(withPsicologoUser()))
+            .andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `PATCH api psicologos me descripcion devuelve 200`() {
+        val respuesta = PsicologoResponse(
+            id = 1L, idEntidadPsicologo = 1L, firebaseUid = firebaseUser.uid,
+            nombre = "Nombre", apellidos = "Apellidos", fotoPerfilUrl = null,
+            numeroColegiado = "1234", especialidades = listOf("clinica"), descripcion = "Nueva bio",
+        )
+        whenever(servicioPsicologo.actualizarDescripcion(psicologoUser.uid, "Nueva bio")).thenReturn(respuesta)
+
+        mockMvc.perform(
+            patch("/api/psicologos/me/descripcion")
+                .with(withPsicologoUser())
+                .contentType("application/json")
+                .content("""{"descripcion":"Nueva bio"}""")
+        ).andExpect(status().isOk)
+            .andExpect(jsonPath("$.descripcion").value("Nueva bio"))
     }
 }
